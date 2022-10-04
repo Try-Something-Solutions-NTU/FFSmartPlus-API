@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "dgSpecHash": "y9T9pLgwy7MGijq3FHmRdoL/o8UWW9v4cmy12jUZWUocq6iPkFlKl+1RnIZ4SP5TYDQpi1za/xeAMaPZbwOr4w==",
+  "success": true,
+  "projectFilePath": "/Users/nickmccaig/RiderProjects/FFsmartPlus/FFsmartPlus/FFsmartPlus.csproj",
+  "expectedPackageFiles": [
+    "/Users/nickmccaig/.nuget/packages/microsoft.extensions.apidescription.server/3.0.0/microsoft.extensions.apidescription.server.3.0.0.nupkg.sha512",
+    "/Users/nickmccaig/.nuget/packages/microsoft.openapi/1.2.3/microsoft.openapi.1.2.3.nupkg.sha512",
+    "/Users/nickmccaig/.nuget/packages/swashbuckle.aspnetcore/6.2.3/swashbuckle.aspnetcore.6.2.3.nupkg.sha512",
+    "/Users/nickmccaig/.nuget/packages/swashbuckle.aspnetcore.swagger/6.2.3/swashbuckle.aspnetcore.swagger.6.2.3.nupkg.sha512",
+    "/Users/nickmccaig/.nuget/packages/swashbuckle.aspnetcore.swaggergen/6.2.3/swashbuckle.aspnetcore.swaggergen.6.2.3.nupkg.sha512",
+    "/Users/nickmccaig/.nuget/packages/swashbuckle.aspnetcore.swaggerui/6.2.3/swashbuckle.aspnetcore.swaggerui.6.2.3.nupkg.sha512"
+  ],
+  "logs": []
+}
