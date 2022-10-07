@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 namespace Infrastructure
 {
 
-    public class AppContext: DbContext
+    public class FridgeAppContext: DbContext
     {
         private readonly bool _log;
 
-        public AppContext()
+        public FridgeAppContext()
         {
         }
 
-        public AppContext(bool log)
+        public FridgeAppContext(bool log)
         {
             _log = log;
         }
@@ -35,7 +35,11 @@ namespace Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-           
+            modelBuilder.Entity<Fridge>().HasData((new Fridge {ID = 1, Name = "MyResturantFridge", Location = "NTU Clifton Campus", ManufacturerID = "AB-01-01"}));
+            modelBuilder.Entity<Item>().HasData((new Item
+                { ID = 1, Name = "Tomatoes", UnitDesc = "Per Tomato", RestockTime = 3, DesiredStock = 1 }));
+            modelBuilder.Entity<Unit>().HasData((new Unit
+                { Id = 1, Quantity = 3, ExpiryDate = new DateTime(2022, 03, 11), ItemId = 1, FridgeId = 1 }));
             // modelBuilder.Entity<Person>()
             //     .HasOne(p => p.Team);
             // modelBuilder
@@ -47,8 +51,8 @@ namespace Infrastructure
             // modelBuilder
             //     .Entity<Team>()
             //     .ToTable("Teams", b => b.IsTemporal());
-            
-                
+
+
         }
     }
 }
