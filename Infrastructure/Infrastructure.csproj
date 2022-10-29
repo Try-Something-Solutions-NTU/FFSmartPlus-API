@@ -11,6 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="MediatR" Version="11.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.0-rc.1.22426.7">
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         <PrivateAssets>all</PrivateAssets>
@@ -23,7 +24,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Common" />
       <Folder Include="Migrations" />
+      <Folder Include="Repositories" />
     </ItemGroup>
 
 </Project>
