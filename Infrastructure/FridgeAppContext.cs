@@ -26,7 +26,8 @@ namespace Infrastructure
         public DbSet<Unit> Units { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Server=127.0.0.1;Database=FFDatabase1;User=sa;Password=@AdminPassWord123;Trust Server Certificate=True");
+            //optionsBuilder.UseSqlServer(@"Server=127.0.0.1;Database=FFDatabase1;User=sa;Password=@AdminPassWord123;Trust Server Certificate=True");
+            optionsBuilder.UseSqlServer(@"Server=localhost;Database=TestServerApp;User=sa;Password=@AdminPassWord123;Trust Server Certificate=True");
 
             if (_log)
             {
