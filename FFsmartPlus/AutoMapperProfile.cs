@@ -18,6 +18,7 @@ public class AutoMapperProfile : Profile
         CreateMap<Item, ItemDto>();
         CreateMap<ItemDto, Item>();
         CreateMap<NewItemDto, Item>();
+        CreateMap<NewUnitDto, Domain.Unit>();
         // Use CreateMap... Etc.. here (Profile methods are the same as configuration methods)
     }
 }

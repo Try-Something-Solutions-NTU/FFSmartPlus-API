@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Application.Item;
 using Application.Unit;
 using AutoMapper;
+using Domain;
 using Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +26,7 @@ namespace FFsmartPlus.Controllers
             _context = context;
             _mapper = mapper;
         }
+        //GET: api/item/{id}/Stock
         [HttpGet("")]
         public async Task<ActionResult<CurrentStockDto>> GetCurrentStock(long id)
         {
@@ -35,11 +37,11 @@ namespace FFsmartPlus.Controllers
             currentStock.item = _mapper.Map<ItemDto>(item);
             return currentStock;
         }
-        //POST: api/Stock/Add
+        //POST: api/item/{id}/Stock/Add
         [HttpPost("Add")]
-        public async Task<ActionResult<bool>> AddStock(UnitDto newUnits)
+        public async Task<ActionResult<bool>> AddStock(long id, NewUnitDto newUnits)
         {
-            Domain.Item item = await _context.Items.FindAsync(newUnits.ItemId);
+            Domain.Item item = await _context.Items.FindAsync(id);
             await _context.Entry(item).Collection(i => i.Units).LoadAsync();
             Domain.Unit unit = item.Units.FirstOrDefault(x => x.ExpiryDate.Equals(newUnits.ExpiryDate));
             try
@@ -47,8 +49,10 @@ namespace FFsmartPlus.Controllers
 
                 if (unit is null)
                 {
-                    var newUnit = _mapper.Map<Domain.Unit>(newUnits);
-                    _context.Units.Add(newUnit);
+                     var newUnit = _mapper.Map<Domain.Unit>(newUnits);
+                    newUnit.Item = item;
+                    item.Units.Add(newUnit);
+                    _context.Entry(item).State = EntityState.Modified;
                 }
                 else
                 {
@@ -58,10 +62,45 @@ namespace FFsmartPlus.Controllers
                 await _context.SaveChangesAsync();
                 return true;
             }
-            catch
+            catch(Exception ex)
             {
                 return false;
             }
         }
+
+        [HttpPost("Remove")] 
+        public async Task<ActionResult<bool>> RemoveStock(long id, double Quantity)
+         {
+             Domain.Item item = await _context.Items.FindAsync(id);
+             await _context.Entry(item).Collection(i => i.Units).LoadAsync();
+             item.Units = item.Units.OrderBy(x => x.ExpiryDate).ToList();
+             //if you try to remove too many items
+             var test = item.Units.Select(x => x.Quantity).Sum();
+             if (test < Quantity)
+             {
+                 return false;
+             }
+             do
+             {
+                 Unit unit = item.Units.OrderBy(x => x.ExpiryDate).First();
+                 if (unit.Quantity <= Quantity)
+                 {
+                     _context.Entry(unit).State = EntityState.Deleted;
+                     item.Units.Remove(unit);
+                     Quantity = Quantity - unit.Quantity;
+                 }
+                 else
+                 {
+                     
+                     unit.Quantity = unit.Quantity - Quantity;
+                     _context.Entry(unit).State = EntityState.Modified;
+                     Quantity = 0;
+                 }
+
+             } while (Quantity != 0);
+             await _context.SaveChangesAsync();
+
+             return  true;
+         }
     }
 }
