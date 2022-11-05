@@ -1,10 +1,8 @@
-namespace Domain;
+namespace Application.Unit;
 
-public class Unit
+public class UnitDto
 {
-    public long Id { get; set; }
     public double Quantity { get; set; }
     public DateTime ExpiryDate { get; set; }
     public long ItemId { get; set; }
-    public Item Item { get; set; }
 }
