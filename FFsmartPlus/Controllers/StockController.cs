@@ -8,12 +8,15 @@ using Application.Unit;
 using AutoMapper;
 using Domain;
 using Infrastructure;
+using Infrastructure.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace FFsmartPlus.Controllers
 {
+    [Authorize(Roles = UserRoles.Chef)]
     [Route("api/Item/{id}/[controller]")]
     [ApiController]
     public class StockController : ControllerBase
@@ -44,15 +47,25 @@ namespace FFsmartPlus.Controllers
             Domain.Item item = await _context.Items.FindAsync(id);
             await _context.Entry(item).Collection(i => i.Units).LoadAsync();
             Domain.Unit unit = item.Units.FirstOrDefault(x => x.ExpiryDate.Equals(newUnits.ExpiryDate));
-            try
-            {
-
+            // try
+            // {
+                AuditUnit auditUnit = new AuditUnit()
+                {
+                    EventDateTime = DateTime.Now,
+                    Activity = Activity.Added,
+                    Quantity = newUnits.Quantity,
+                    ExpiryDate = newUnits.ExpiryDate,
+                    ItemId = id,
+                    Item = item
+                };
+                _context.AuditUnits.Add(auditUnit);
+                
                 if (unit is null)
                 {
                      var newUnit = _mapper.Map<Domain.Unit>(newUnits);
                     newUnit.Item = item;
                     item.Units.Add(newUnit);
-                    _context.Entry(item).State = EntityState.Modified;
+                    _context.Entry(item).State = EntityState.Added;
                 }
                 else
                 {
@@ -61,11 +74,11 @@ namespace FFsmartPlus.Controllers
                 }
                 await _context.SaveChangesAsync();
                 return true;
-            }
-            catch(Exception ex)
-            {
-                return false;
-            }
+            // }
+            // catch(Exception ex)
+            // {
+            //     return false;
+            // }
         }
 
         [HttpPost("Remove")] 
@@ -73,7 +86,8 @@ namespace FFsmartPlus.Controllers
          {
              Domain.Item item = await _context.Items.FindAsync(id);
              await _context.Entry(item).Collection(i => i.Units).LoadAsync();
-             item.Units = item.Units.OrderBy(x => x.ExpiryDate).ToList();
+             item.Units = item.Units.ToList();
+              
              //if you try to remove too many items
              var test = item.Units.Select(x => x.Quantity).Sum();
              if (test < Quantity)

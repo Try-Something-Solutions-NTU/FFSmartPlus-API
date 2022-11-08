@@ -7,4 +7,6 @@ public class Item
     public string UnitDesc { get; set; }
 
     public ICollection<Unit> Units { get; set; }
+    public bool Active { get; set; } = true;
+
 }

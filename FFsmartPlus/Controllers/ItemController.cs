@@ -34,7 +34,7 @@ namespace FFsmartPlus.Controllers
           {
               return NotFound();
           } 
-          var items = await _context.Items.ToListAsync();
+          var items = await _context.Items.Where(x => x.Active.Equals(true)).ToListAsync();
           return _mapper.Map<List<ItemDto>>(items);
         }
 
@@ -61,11 +61,12 @@ namespace FFsmartPlus.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutItem(long id, ItemDto putItem)
         {
-            if (id != putItem.Id)
+            var test = ItemActive(id);
+            if (id != putItem.Id || !ItemActive(id))
             {
                 return BadRequest();
             }
-
+            
             var item = _mapper.Map<Item>(putItem);
             var validatorResult = await _itemValidator.ValidateAsync(item);
             if (!validatorResult.IsValid)
@@ -91,6 +92,41 @@ namespace FFsmartPlus.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpPut("{id}/deactivate")]
+        public async Task<IActionResult> DeactivateItem(long id)
+        {
+            if (_context.Items == null)
+            {
+                return NotFound();
+            }
+            var item = await _context.Items.FindAsync(id);
+
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            item.Active = false;
+            _context.Entry(item).State = EntityState.Modified;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ItemExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return NoContent();
+
         }
 
         // POST: api/Item
@@ -133,7 +169,8 @@ namespace FFsmartPlus.Controllers
                 return NotFound();
             }
 
-            _context.Items.Remove(item);
+            item.Active = false;
+            _context.Entry(item).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -142,6 +179,10 @@ namespace FFsmartPlus.Controllers
         private bool ItemExists(long id)
         {
             return (_context.Items?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+        private bool ItemActive(long id)
+        {
+            return (_context.Items?.Any(e => e.Id == id && e.Active == true)).GetValueOrDefault();
         }
     }
 }
