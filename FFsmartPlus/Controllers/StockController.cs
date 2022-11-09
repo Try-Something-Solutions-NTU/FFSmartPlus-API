@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Application.Item;
 using Application.Unit;
@@ -33,7 +34,9 @@ namespace FFsmartPlus.Controllers
         [HttpGet("")]
         public async Task<ActionResult<CurrentStockDto>> GetCurrentStock(long id)
         {
+
             var currentStock = new CurrentStockDto();
+            
             Domain.Item item = await _context.Items.FindAsync(id);
             await _context.Entry(item).Collection(i => i.Units).LoadAsync();
             currentStock.currentQuantity = item.Units.Select(x => x.Quantity).Sum();
@@ -44,6 +47,8 @@ namespace FFsmartPlus.Controllers
         [HttpPost("Add")]
         public async Task<ActionResult<bool>> AddStock(long id, NewUnitDto newUnits)
         {
+            string userName= User.Identity.Name;
+            
             Domain.Item item = await _context.Items.FindAsync(id);
             await _context.Entry(item).Collection(i => i.Units).LoadAsync();
             Domain.Unit unit = item.Units.FirstOrDefault(x => x.ExpiryDate.Equals(newUnits.ExpiryDate));
@@ -56,16 +61,17 @@ namespace FFsmartPlus.Controllers
                     Quantity = newUnits.Quantity,
                     ExpiryDate = newUnits.ExpiryDate,
                     ItemId = id,
-                    Item = item
+                    Item = item,
+                    UserName = userName
+                    
                 };
                 _context.AuditUnits.Add(auditUnit);
                 
                 if (unit is null)
                 {
-                     var newUnit = _mapper.Map<Domain.Unit>(newUnits);
+                    var newUnit = _mapper.Map<Domain.Unit>(newUnits);
                     newUnit.Item = item;
                     item.Units.Add(newUnit);
-                    _context.Entry(item).State = EntityState.Added;
                 }
                 else
                 {

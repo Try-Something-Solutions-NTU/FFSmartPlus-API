@@ -9,6 +9,8 @@ public class AuditUnit
     public Item Item { get; set; }
     public Activity Activity { get; set; }
     public DateTime EventDateTime { get; set; }
+    
+    public string UserName { get; set; }
 }
 
 public enum Activity
