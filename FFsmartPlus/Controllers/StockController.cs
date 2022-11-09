@@ -34,9 +34,7 @@ namespace FFsmartPlus.Controllers
         [HttpGet("")]
         public async Task<ActionResult<CurrentStockDto>> GetCurrentStock(long id)
         {
-
             var currentStock = new CurrentStockDto();
-            
             Domain.Item item = await _context.Items.FindAsync(id);
             await _context.Entry(item).Collection(i => i.Units).LoadAsync();
             currentStock.currentQuantity = item.Units.Select(x => x.Quantity).Sum();
@@ -47,7 +45,6 @@ namespace FFsmartPlus.Controllers
         [HttpPost("Add")]
         public async Task<ActionResult<bool>> AddStock(long id, NewUnitDto newUnits)
         {
-            string userName= User.Identity.Name;
             
             Domain.Item item = await _context.Items.FindAsync(id);
             await _context.Entry(item).Collection(i => i.Units).LoadAsync();
@@ -62,8 +59,7 @@ namespace FFsmartPlus.Controllers
                     ExpiryDate = newUnits.ExpiryDate,
                     ItemId = id,
                     Item = item,
-                    UserName = userName
-                    
+                    UserName = User.Identity.Name
                 };
                 _context.AuditUnits.Add(auditUnit);
                 
@@ -71,6 +67,7 @@ namespace FFsmartPlus.Controllers
                 {
                     var newUnit = _mapper.Map<Domain.Unit>(newUnits);
                     newUnit.Item = item;
+                    newUnit.ItemId = id;
                     item.Units.Add(newUnit);
                 }
                 else
@@ -105,13 +102,36 @@ namespace FFsmartPlus.Controllers
                  Unit unit = item.Units.OrderBy(x => x.ExpiryDate).First();
                  if (unit.Quantity <= Quantity)
                  {
+                     AuditUnit auditUnit = new AuditUnit()
+                     {
+                         EventDateTime = DateTime.Now,
+                         Activity = Activity.removed,
+                         Quantity = unit.Quantity,
+                         ExpiryDate = unit.ExpiryDate,
+                         ItemId = id,
+                         Item = item,
+                         UserName = User.Identity.Name
+                     };
+                     _context.AuditUnits.Add(auditUnit);
                      _context.Entry(unit).State = EntityState.Deleted;
                      item.Units.Remove(unit);
+                     
                      Quantity = Quantity - unit.Quantity;
                  }
                  else
                  {
-                     
+                     AuditUnit auditUnit = new AuditUnit()
+                     {
+                         EventDateTime = DateTime.Now,
+                         Activity = Activity.removed,
+                         Quantity = unit.Quantity,
+                         ExpiryDate = unit.ExpiryDate,
+                         ItemId = id,
+                         Item = item,
+                         UserName = User.Identity.Name
+                     };
+                     _context.AuditUnits.Add(auditUnit);
+
                      unit.Quantity = unit.Quantity - Quantity;
                      _context.Entry(unit).State = EntityState.Modified;
                      Quantity = 0;
@@ -122,5 +142,7 @@ namespace FFsmartPlus.Controllers
 
              return  true;
          }
+
+        
     }
 }
