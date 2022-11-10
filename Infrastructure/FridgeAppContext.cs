@@ -27,9 +27,10 @@ namespace Infrastructure
         public DbSet<Item> Items { get; set; }
         public DbSet<Unit> Units { get; set; }
         public DbSet<AuditUnit> AuditUnits { get; set; }
+        public DbSet<Supplier> Suppliers { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Server=127.0.0.1;Database=AuthDb;User=sa;Password=@AdminPassWord123;Trust Server Certificate=True");
+            optionsBuilder.UseSqlServer(@"Server=127.0.0.1;Database=FF3;User=sa;Password=@AdminPassWord123;Trust Server Certificate=True");
             //optionsBuilder.UseSqlServer(@"Server=localhost;Database=TestServerApp;User=sa;Password=@AdminPassWord123;Trust Server Certificate=True");
             if (_log)
             {
@@ -45,11 +46,13 @@ namespace Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Supplier>().HasData((new Supplier() 
+                {Id = 1, Name = "Fruit Supplier Inc", Address = "TestingABC", Email = "Email@test.com"}));
             modelBuilder.Entity<Item>().HasData((new Item
-                { Id = 1, Name = "Tomatoes", UnitDesc = "Per Tomato", Active = true}));
+                { Id = 1, Name = "Tomatoes", UnitDesc = "Per Tomato", Active = true, SupplierId = 1}));
             modelBuilder.Entity<Unit>().HasData((new Unit
                 { Id = 1, Quantity = 3, ExpiryDate = new DateTime(2022, 03, 11), ItemId = 1}));
-            base.OnModelCreating(modelBuilder);
+                        base.OnModelCreating(modelBuilder);
 
             // modelBuilder.Entity<Person>()
             //     .HasOne(p => p.Team);
