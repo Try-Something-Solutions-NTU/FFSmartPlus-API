@@ -142,7 +142,8 @@ namespace FFsmartPlus.Controllers
           var item = new Item
           {
               Name = newItem.Name,
-              UnitDesc = newItem.UnitDesc
+              UnitDesc = newItem.UnitDesc,
+              SupplierId = newItem.SupplierId
           };
           var validatorResult = await _itemValidator.ValidateAsync(item);
           if (!validatorResult.IsValid)

@@ -1,5 +1,6 @@
 using Application.Fridge;
 using Application.Item;
+using Application.Supplier;
 using Application.Unit;
 using AutoMapper;
 using Domain;
@@ -20,6 +21,8 @@ public class AutoMapperProfile : Profile
         CreateMap<NewItemDto, Item>();
         CreateMap<NewUnitDto, Domain.Unit>();
         CreateMap<NewUnitDto, AuditUnit>();
+        CreateMap<Supplier, SupplierDto>();
+        CreateMap<NewSupplierDto, Supplier>();
         // Use CreateMap... Etc.. here (Profile methods are the same as configuration methods)
     }
 }

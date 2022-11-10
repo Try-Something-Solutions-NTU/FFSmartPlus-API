@@ -26,9 +26,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Common" />
       <Folder Include="Migrations" />
-      <Folder Include="Repositories" />
     </ItemGroup>
 
 </Project>
