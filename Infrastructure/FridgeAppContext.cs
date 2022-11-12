@@ -49,7 +49,7 @@ namespace Infrastructure
             modelBuilder.Entity<Supplier>().HasData((new Supplier() 
                 {Id = 1, Name = "Fruit Supplier Inc", Address = "TestingABC", Email = "Email@test.com"}));
             modelBuilder.Entity<Item>().HasData((new Item
-                { Id = 1, Name = "Tomatoes", UnitDesc = "Per Tomato", Active = true, SupplierId = 1}));
+                { Id = 1, Name = "Tomatoes", UnitDesc = "Per Tomato", Active = true, SupplierId = 1, minimumStock = 10}));
             modelBuilder.Entity<Unit>().HasData((new Unit
                 { Id = 1, Quantity = 3, ExpiryDate = new DateTime(2022, 03, 11), ItemId = 1}));
                         base.OnModelCreating(modelBuilder);

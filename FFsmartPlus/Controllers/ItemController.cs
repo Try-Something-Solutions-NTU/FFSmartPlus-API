@@ -55,6 +55,7 @@ namespace FFsmartPlus.Controllers
             
             return _mapper.Map<ItemDto>(item);
         }
+        
 
         // PUT: api/Item/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -143,6 +144,7 @@ namespace FFsmartPlus.Controllers
           {
               Name = newItem.Name,
               UnitDesc = newItem.UnitDesc,
+              minimumStock = newItem.minimumStock,
               SupplierId = newItem.SupplierId
           };
           var validatorResult = await _itemValidator.ValidateAsync(item);

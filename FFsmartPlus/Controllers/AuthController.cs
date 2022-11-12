@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FFsmartPlus.Controllers
 {
@@ -84,6 +85,43 @@ namespace FFsmartPlus.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = UserRoles.Admin)]
+        [Route("{username}/Add-Role")]
+        public async Task<IActionResult> AddRole(string username, string role)
+        {
+            if (!await _roleManager.RoleExistsAsync(role))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Responce.Response { Status = "Error", Message = "Role does not exist!" });
+
+            }
+            var user = await _userManager.FindByNameAsync(username);
+            if (user == null)
+                return StatusCode(StatusCodes.Status400BadRequest, new Responce.Response { Status = "Error", Message = "User already exists!" });
+            if( await _userManager.IsInRoleAsync(user, role))
+                return StatusCode(StatusCodes.Status400BadRequest, new Responce.Response { Status = "Error", Message = "User Is already in role exists!" });
+            await _userManager.AddToRoleAsync(user, role);
+            return Ok(new Responce.Response { Status = "Success", Message = $"{username} added to {role} successfully!" });
+        }
+        [HttpPost]
+        [Authorize(Roles = UserRoles.Admin)]
+        [Route("{username}/Remove-Role")]
+        public async Task<IActionResult> RemoveRole(string username, string role)
+        {
+            if (!await _roleManager.RoleExistsAsync(role))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Responce.Response { Status = "Error", Message = "Role does not exist!" });
+
+            }
+            var user = await _userManager.FindByNameAsync(username);
+            if (user == null)
+                return StatusCode(StatusCodes.Status400BadRequest, new Responce.Response { Status = "Error", Message = "User already exists!" });
+            if( !await _userManager.IsInRoleAsync(user, role))
+                return StatusCode(StatusCodes.Status400BadRequest, new Responce.Response { Status = "Error", Message = "User Is not in  in role!" });
+            await _userManager.RemoveFromRoleAsync(user, role);
+            return Ok(new Responce.Response { Status = "Success", Message = $"{username} added to {role} successfully!" });
+        }
+    
+        [HttpPost]
         [Route("register-admin")]
         public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)
         {
@@ -105,6 +143,8 @@ namespace FFsmartPlus.Controllers
                 await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
             if (!await _roleManager.RoleExistsAsync(UserRoles.Chef))
                 await _roleManager.CreateAsync(new IdentityRole(UserRoles.Chef));
+            if (!await _roleManager.RoleExistsAsync(UserRoles.Delivery))
+                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Delivery));
 
             if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
             {
@@ -113,6 +153,10 @@ namespace FFsmartPlus.Controllers
             if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
             {
                 await _userManager.AddToRoleAsync(user, UserRoles.Chef);
+            }
+            if (await _roleManager.RoleExistsAsync(UserRoles.Delivery))
+            {
+                await _userManager.AddToRoleAsync(user, UserRoles.Delivery);
             }
             return Ok(new Responce.Response { Status = "Success", Message = "User created successfully!" });
         }

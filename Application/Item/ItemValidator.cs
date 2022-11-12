@@ -7,6 +7,8 @@ public class ItemValidator : AbstractValidator<Domain.Item>
     {
         RuleFor(x => x.Name).Length(3, 40);
         RuleFor(x => x.UnitDesc).Length(3, 20);
+        RuleFor(x => x.minimumStock).GreaterThan(0);
+            
     }
     
 }
