@@ -110,7 +110,6 @@ namespace FFsmartPlus.Controllers
             if (!await _roleManager.RoleExistsAsync(role))
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Responce.Response { Status = "Error", Message = "Role does not exist!" });
-
             }
             var user = await _userManager.FindByNameAsync(username);
             if (user == null)

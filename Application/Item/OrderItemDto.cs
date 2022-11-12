@@ -1,11 +1,9 @@
 namespace Application.Item;
 
-public class ItemDto
+public class OrderItemDto
 {
     public long Id { get; set; }
     public string? Name { get; set; }
     public string? UnitDesc { get; set; }
-    public double minimumStock { get; set; }
-
-    public long SupplierId { get; set; }
+    public double OrderQuantity { get; set; }
 }
