@@ -24,15 +24,15 @@ public class OrdersController : ControllerBase
     [HttpGet("BelowMin")]
     public async Task<ActionResult<IEnumerable<ItemDto>>> GetItemsBelowMinStock()
     {
-        var lowStockItems = await  GetItemDelowMiniumStock();
+        var lowStockItems = await  GetItemBelowMiniumStock();
         return _mapper.Map<List<ItemDto>>(lowStockItems);
     }
-
+    
     [HttpGet("BelowMin/GenerateOrder")]
     public async Task<ActionResult<IEnumerable<SupplierOrderDto>>> GetMinimumOrder()
     {
         var Orders = new List<SupplierOrderDto>();
-        var lowStockItems =  await GetItemDelowMiniumStock();
+        var lowStockItems =  await GetItemBelowMiniumStock();
         foreach (var item in lowStockItems)
         {
             var newOrderItem = new OrderItemDto()
@@ -56,7 +56,7 @@ public class OrdersController : ControllerBase
                     supplierId = item.SupplierId,
                     Name = item.Supplier.Name,
                     Address = item.Supplier.Address,
-                    Email = item.Supplier.Address
+                    Email = item.Supplier.Email
                 };
                 newSupplier.Orders.Add(newOrderItem);
                 Orders.Add(newSupplier);
@@ -73,7 +73,7 @@ public class OrdersController : ControllerBase
 
     }
 
-    private async Task<List<Item>> GetItemDelowMiniumStock()
+    private async Task<List<Item>> GetItemBelowMiniumStock()
     {
         var items = await _context.Items.Where(x => x.Active.Equals(true)).Include(i => i.Supplier).ToListAsync();
         var lowStockItems = new List<Item>();
