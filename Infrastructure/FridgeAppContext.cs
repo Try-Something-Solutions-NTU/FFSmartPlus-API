@@ -30,7 +30,7 @@ namespace Infrastructure
         public DbSet<Supplier> Suppliers { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Server=127.0.0.1;Database=FF3;User=sa;Password=@AdminPassWord123;Trust Server Certificate=True");
+            optionsBuilder.UseSqlServer(@"Server=JPC\SQLEXPRESS;Database=AAD1;User=user1;Password=Password1;Trust Server Certificate=True");
             //optionsBuilder.UseSqlServer(@"Server=localhost;Database=TestServerApp;User=sa;Password=@AdminPassWord123;Trust Server Certificate=True");
             if (_log)
             {

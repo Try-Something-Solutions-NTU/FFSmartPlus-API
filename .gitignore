@@ -456,3 +456,6 @@ FFsmartPlus/appsettings.Development.json
 FFsmartPlus/appsettings.Development.json
 FFsmartPlus/appsettings.Development.json
 FFsmartPlus/appsettings.Development.json
+
+# Migrations
+Infrastructure/Migrations/
