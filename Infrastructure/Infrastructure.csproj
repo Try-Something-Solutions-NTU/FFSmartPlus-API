@@ -27,8 +27,6 @@
 
     <ItemGroup>
       <Folder Include="EmailSender" />
-      <Folder Include="Migrations" />
-      <Folder Include="Migrations\" />
     </ItemGroup>
 
 </Project>
