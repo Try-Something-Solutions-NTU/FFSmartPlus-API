@@ -53,7 +53,9 @@ public class AdminController : ControllerBase
             };
             _context.AuditUnits.Add(auditUnit);
         }
-        await _context.Units.Where(x => x.ExpiryDate <= DateTime.Today).ExecuteDeleteAsync();
+
+        var UnitsToRemove = _context.Units.Where(x => x.ExpiryDate <= DateTime.Today);
+        _context.Units.RemoveRange(UnitsToRemove);
         _context.SaveChangesAsync();
         return NoContent();
     } 
