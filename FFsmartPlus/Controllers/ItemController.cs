@@ -46,8 +46,9 @@ namespace FFsmartPlus.Controllers
           {
               return NotFound();
           }
-            var item = await _context.Items.FindAsync(id);
 
+          var item = await _context.Items.FirstOrDefaultAsync(x => x.Active.Equals(true) && x.Id == id);
+            
             if (item == null)
             {
                 return NotFound();
