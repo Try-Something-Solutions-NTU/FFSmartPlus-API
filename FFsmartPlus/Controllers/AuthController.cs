@@ -96,9 +96,9 @@ namespace FFsmartPlus.Controllers
             }
             var user = await _userManager.FindByNameAsync(username);
             if (user == null)
-                return StatusCode(StatusCodes.Status400BadRequest, new Responce.Response { Status = "Error", Message = "User already exists!" });
+                return StatusCode(StatusCodes.Status400BadRequest, new Responce.Response { Status = "Error", Message = "User does not exist" });
             if( await _userManager.IsInRoleAsync(user, role))
-                return StatusCode(StatusCodes.Status400BadRequest, new Responce.Response { Status = "Error", Message = "User Is already in role exists!" });
+                return StatusCode(StatusCodes.Status400BadRequest, new Responce.Response { Status = "Error", Message = "User Is already in role!" });
             await _userManager.AddToRoleAsync(user, role);
             return Ok(new Responce.Response { Status = "Success", Message = $"{username} added to {role} successfully!" });
         }
@@ -113,7 +113,7 @@ namespace FFsmartPlus.Controllers
             }
             var user = await _userManager.FindByNameAsync(username);
             if (user == null)
-                return StatusCode(StatusCodes.Status400BadRequest, new Responce.Response { Status = "Error", Message = "User already exists!" });
+                return StatusCode(StatusCodes.Status400BadRequest, new Responce.Response { Status = "Error", Message = "User does not exist" });
             if( !await _userManager.IsInRoleAsync(user, role))
                 return StatusCode(StatusCodes.Status400BadRequest, new Responce.Response { Status = "Error", Message = "User Is not in  in role!" });
             await _userManager.RemoveFromRoleAsync(user, role);
