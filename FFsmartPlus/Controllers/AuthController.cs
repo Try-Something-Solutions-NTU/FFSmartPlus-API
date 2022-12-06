@@ -117,7 +117,7 @@ namespace FFsmartPlus.Controllers
             if( !await _userManager.IsInRoleAsync(user, role))
                 return StatusCode(StatusCodes.Status400BadRequest, new Responce.Response { Status = "Error", Message = "User Is not in  in role!" });
             await _userManager.RemoveFromRoleAsync(user, role);
-            return Ok(new Responce.Response { Status = "Success", Message = $"{username} added to {role} successfully!" });
+            return Ok(new Responce.Response { Status = "Success", Message = $"{username} removed from {role} successfully!" });
         }
     
         [HttpPost]
