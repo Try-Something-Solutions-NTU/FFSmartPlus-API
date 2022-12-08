@@ -10,6 +10,7 @@ public class Item
     public long SupplierId { get; set; }
     
     public double minimumStock { get; set; }
+    public double desiredStock { get; set; }
     
     public Supplier Supplier { get; set; }
     
