@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain;
+using FluentValidation.Results;
 using Infrastructure;
 
 namespace FFsmartPlus.Controllers
@@ -68,6 +69,8 @@ namespace FFsmartPlus.Controllers
         // PUT: api/Supplier/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [ProducesResponseType(typeof(SupplierDto), 200)]
+        [ProducesResponseType(typeof(ValidationResult), 400)]
         public async Task<IActionResult> PutSupplier(long id, Supplier supplier)
         {
             if (id != supplier.Id)
@@ -77,7 +80,7 @@ namespace FFsmartPlus.Controllers
             var validatorResult = await _supplierValidator.ValidateAsync(supplier);
             if (!validatorResult.IsValid)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, validatorResult.Errors);
+                return StatusCode(StatusCodes.Status400BadRequest, validatorResult);
             }
             _context.Entry(supplier).State = EntityState.Modified;
             
@@ -105,6 +108,8 @@ namespace FFsmartPlus.Controllers
         // POST: api/Supplier
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [ProducesResponseType(typeof(SupplierDto), 200)]
+        [ProducesResponseType(typeof(ValidationResult), 400)]
         public async Task<ActionResult<Supplier>> PostSupplier(NewSupplierDto supplier)
         {
           if (_context.Suppliers == null)
@@ -121,7 +126,7 @@ namespace FFsmartPlus.Controllers
           var validatorResult = await _supplierValidator.ValidateAsync(newSupplier);
           if (!validatorResult.IsValid)
           {
-              return StatusCode(StatusCodes.Status400BadRequest, validatorResult.Errors);
+              return StatusCode(StatusCodes.Status400BadRequest, validatorResult);
           }
           _context.Suppliers.Add(newSupplier);
             await _context.SaveChangesAsync();

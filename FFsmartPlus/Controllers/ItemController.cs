@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain;
+using FluentValidation.Results;
 using Infrastructure;
 
 namespace FFsmartPlus.Controllers
@@ -64,6 +65,8 @@ namespace FFsmartPlus.Controllers
         /// <summary>
         /// Update an item by ID
         /// </summary>
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ValidationResult), 400)]
         // PUT: api/Item/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -79,10 +82,9 @@ namespace FFsmartPlus.Controllers
             var validatorResult = await _itemValidator.ValidateAsync(item);
             if (!validatorResult.IsValid)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, validatorResult.Errors);
+                return StatusCode(StatusCodes.Status400BadRequest, validatorResult);
             }
             _context.Entry(item).State = EntityState.Modified;
-
             try
             {
                 await _context.SaveChangesAsync();
@@ -144,6 +146,8 @@ namespace FFsmartPlus.Controllers
         // POST: api/Item
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [ProducesResponseType(typeof(ItemDto), 200)]
+        [ProducesResponseType(typeof(ValidationResult), 400)]
         public async Task<ActionResult<Item>> PostItem(NewItemDto newItem)
         {
           if (_context.Items == null)
@@ -161,7 +165,7 @@ namespace FFsmartPlus.Controllers
           var validatorResult = await _itemValidator.ValidateAsync(item);
           if (!validatorResult.IsValid)
           {
-              return StatusCode(StatusCodes.Status400BadRequest, validatorResult.Errors);
+              return StatusCode(StatusCodes.Status400BadRequest, validatorResult);
           }
           _context.Items.Add(item);
           await _context.SaveChangesAsync();
