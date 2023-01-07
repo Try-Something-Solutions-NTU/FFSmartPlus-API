@@ -25,7 +25,9 @@ namespace FFsmartPlus.Controllers
             _mapper = mapper;
             _itemValidator = new ItemValidator();
         }
-
+        /// <summary>
+        /// Get all active items
+        /// </summary>
         // GET: api/Item
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ItemDto>>> GetItems()
@@ -37,7 +39,9 @@ namespace FFsmartPlus.Controllers
           var items = await _context.Items.Where(x => x.Active.Equals(true)).ToListAsync();
           return _mapper.Map<List<ItemDto>>(items);
         }
-
+        /// <summary>
+        /// Get Item by ID
+        /// </summary>
         // GET: api/Item/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ItemDto>> GetItem(long id)
@@ -57,7 +61,9 @@ namespace FFsmartPlus.Controllers
             return _mapper.Map<ItemDto>(item);
         }
         
-
+        /// <summary>
+        /// Update an item by ID
+        /// </summary>
         // PUT: api/Item/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -95,7 +101,9 @@ namespace FFsmartPlus.Controllers
 
             return NoContent();
         }
-
+        /// <summary>
+        /// Deactivate an item 
+        /// </summary>
         [HttpPut("{id}/deactivate")]
         public async Task<IActionResult> DeactivateItem(long id)
         {
@@ -130,7 +138,9 @@ namespace FFsmartPlus.Controllers
             return NoContent();
 
         }
-
+        /// <summary>
+        /// Create a new Item
+        /// </summary>
         // POST: api/Item
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -158,7 +168,9 @@ namespace FFsmartPlus.Controllers
 
             return CreatedAtAction("GetItem", new { id = item.Id }, item);
         }
-
+        /// <summary>
+        /// Deletes a specific Item
+        /// </summary>
         // DELETE: api/Item/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteItem(long id)

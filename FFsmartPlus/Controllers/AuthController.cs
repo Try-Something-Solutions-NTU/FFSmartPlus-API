@@ -32,8 +32,12 @@ namespace FFsmartPlus.Controllers
             _roleManager = roleManager;
             _configuration = configuration;
         }
-
+        /// <summary>
+        /// User Login 
+        /// </summary>
         [HttpPost]
+        [ProducesResponseType(typeof(LoginRespDto), 200)]
+        [ProducesResponseType( 401)]
         [Route("login")]
         public async Task<ActionResult<LoginRespDto>> Login([FromBody] LoginModel model)
         {
@@ -63,14 +67,16 @@ namespace FFsmartPlus.Controllers
             }
             return Unauthorized();
         }
-
+        /// <summary>
+        /// Register user
+        /// </summary>
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
             var userExists = await _userManager.FindByNameAsync(model.Username);
             if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Responce.Response { Status = "Error", Message = "User already exists!" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
 
             IdentityUser user = new()
             {
@@ -80,54 +86,67 @@ namespace FFsmartPlus.Controllers
             };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Responce.Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
 
-            return Ok(new Responce.Response { Status = "Success", Message = "User created successfully!" });
+            return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
-
+        /// <summary>
+        /// Admin function to add user to role
+        /// </summary>
         [HttpPost]
         [Authorize(Roles = UserRoles.Admin)]
+        [ProducesResponseType(typeof(Response), 200)]
+        [ProducesResponseType( 401)]
+        [ProducesResponseType(typeof(Response), 400)]
         [Route("{username}/Add-Role")]
         public async Task<IActionResult> AddRole(string username, string role)
         {
             if (!await _roleManager.RoleExistsAsync(role))
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new Responce.Response { Status = "Error", Message = "Role does not exist!" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Role does not exist!" });
 
             }
             var user = await _userManager.FindByNameAsync(username);
             if (user == null)
-                return StatusCode(StatusCodes.Status400BadRequest, new Responce.Response { Status = "Error", Message = "User does not exist" });
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "User does not exist" });
             if( await _userManager.IsInRoleAsync(user, role))
-                return StatusCode(StatusCodes.Status400BadRequest, new Responce.Response { Status = "Error", Message = "User Is already in role!" });
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "User Is already in role!" });
             await _userManager.AddToRoleAsync(user, role);
-            return Ok(new Responce.Response { Status = "Success", Message = $"{username} added to {role} successfully!" });
+            return Ok(new Response { Status = "Success", Message = $"{username} added to {role} successfully!" });
         }
+        /// <summary>
+        /// Admin function to remove user from role
+        /// </summary>
         [HttpPost]
+        [ProducesResponseType(typeof(Response), 200)]
+        [ProducesResponseType( 401)]
+        [ProducesResponseType(typeof(Response), 400)]
         [Authorize(Roles = UserRoles.Admin)]
         [Route("{username}/Remove-Role")]
         public async Task<IActionResult> RemoveRole(string username, string role)
         {
             if (!await _roleManager.RoleExistsAsync(role))
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new Responce.Response { Status = "Error", Message = "Role does not exist!" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Role does not exist!" });
             }
             var user = await _userManager.FindByNameAsync(username);
             if (user == null)
-                return StatusCode(StatusCodes.Status400BadRequest, new Responce.Response { Status = "Error", Message = "User does not exist" });
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "User does not exist" });
             if( !await _userManager.IsInRoleAsync(user, role))
-                return StatusCode(StatusCodes.Status400BadRequest, new Responce.Response { Status = "Error", Message = "User Is not in  in role!" });
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "User Is not in  in role!" });
             await _userManager.RemoveFromRoleAsync(user, role);
-            return Ok(new Responce.Response { Status = "Success", Message = $"{username} removed from {role} successfully!" });
+            return Ok(new Response { Status = "Success", Message = $"{username} removed from {role} successfully!" });
         }
-    
+        /// <summary>
+        /// DEV FUNCTION - Registers new user on all role
+        /// </summary>
         [HttpPost]
         [Route("register-admin")]
         public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)
         {
             var userExists = await _userManager.FindByNameAsync(model.Username);
             if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Responce.Response { Status = "Error", Message = "User already exists!" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
 
             IdentityUser user = new()
             {
@@ -137,7 +156,7 @@ namespace FFsmartPlus.Controllers
             };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Responce.Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
 
             if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
                 await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
@@ -158,7 +177,7 @@ namespace FFsmartPlus.Controllers
             {
                 await _userManager.AddToRoleAsync(user, UserRoles.Delivery);
             }
-            return Ok(new Responce.Response { Status = "Success", Message = "User created successfully!" });
+            return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
 
         private JwtSecurityToken GetToken(List<Claim> authClaims)

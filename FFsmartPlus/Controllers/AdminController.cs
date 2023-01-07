@@ -28,13 +28,18 @@ public class AdminController : ControllerBase
         _context = context;
         _mapper = mapper;
     }
+    /// <summary>
+    /// Get Expired Items
+    /// </summary>
     [HttpGet("Expiry")]
     public async Task<ActionResult<List<UnitListDto>>> GetExpiredItems()
     {
         var expiredItems = _context.Units.Where(x => x.ExpiryDate <= DateTime.Today).ToList();
         return _mapper.Map<List<UnitListDto>>(expiredItems);
     }
-
+    /// <summary>
+    /// Runs End of day operations
+    /// </summary>
     [HttpDelete("EndOfDay")]
     public async Task<ActionResult> EndOfDay()
     {

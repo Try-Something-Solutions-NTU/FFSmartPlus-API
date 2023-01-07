@@ -30,6 +30,9 @@ namespace FFsmartPlus.Controllers
             _context = context;
             _mapper = mapper;
         }
+        /// <summary>
+        /// Get the current stock of an Item 
+        /// </summary>
         //GET: api/item/{id}/Stock
         [HttpGet("")]
         public async Task<ActionResult<CurrentStockDto>> GetCurrentStock(long id)
@@ -41,6 +44,9 @@ namespace FFsmartPlus.Controllers
             currentStock.item = _mapper.Map<ItemDto>(item);
             return currentStock;
         }
+        /// <summary>
+        /// Add units to stock 
+        /// </summary>
         //POST: api/item/{id}/Stock/Add
         [HttpPost("Add")]
         public async Task<ActionResult<bool>> AddStock(long id, NewUnitDto newUnits)
@@ -83,7 +89,9 @@ namespace FFsmartPlus.Controllers
             //     return false;
             // }
         }
-
+        /// <summary>
+        /// Remove units from stock following FIFO
+        /// </summary>
         [HttpPost("Remove")] 
         public async Task<ActionResult<bool>> RemoveStock(long id, double Quantity)
          {

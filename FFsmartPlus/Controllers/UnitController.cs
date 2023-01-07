@@ -20,6 +20,9 @@ namespace FFsmartPlus.Controllers;
             _context = context;
             _mapper = mapper;
         }
+        /// <summary>
+        /// Get units by item ID
+        /// </summary>
         // GET : api/item/{id}/Item
         [HttpGet("")]
         public async Task<ActionResult<List<UnitsDto>>> getUnitsDto(long id)

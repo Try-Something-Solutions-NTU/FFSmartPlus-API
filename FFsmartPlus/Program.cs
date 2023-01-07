@@ -1,5 +1,7 @@
 
+using System.Reflection;
 using System.Text;
+using System.Xml.XPath;
 using AutoMapper;
 using Domain;
 using FFsmartPlus;
@@ -40,6 +42,8 @@ builder.Services.AddSwaggerGen(opt =>
         BearerFormat = "JWT",
         Scheme = "bearer"
     });
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    opt.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
     
     
     opt.AddSecurityRequirement(new OpenApiSecurityRequirement

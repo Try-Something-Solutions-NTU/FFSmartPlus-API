@@ -20,6 +20,9 @@ public class OrdersController : ControllerBase
         _context = context;
         _mapper = mapper;
     }
+    /// <summary>
+    /// Get list of items below minimum stock level
+    /// </summary>
     //Get: api/Orders/BelowMin
     [HttpGet("BelowMin")]
     public async Task<ActionResult<IEnumerable<ItemDto>>> GetItemsBelowMinStock()
@@ -27,7 +30,9 @@ public class OrdersController : ControllerBase
         var lowStockItems = await  GetItemBelowMiniumStock();
         return _mapper.Map<List<ItemDto>>(lowStockItems);
     }
-    
+    /// <summary>
+    /// Generates an order of items below the minimum stock level
+    /// </summary>
     [HttpGet("BelowMin/GenerateOrder")]
     public async Task<ActionResult<IEnumerable<SupplierOrderDto>>> GetMinimumOrder()
     {
@@ -65,7 +70,7 @@ public class OrdersController : ControllerBase
 
         return Orders;
     }
-
+  
     private async Task<double> GetCurrentStock(Item item)
     {
         await _context.Entry(item).Collection(i => i.Units).LoadAsync();

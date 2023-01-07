@@ -27,7 +27,9 @@ namespace FFsmartPlus.Controllers
             _mapper = mapper;
             _supplierValidator = new SupplierValidator();
         }
-
+        /// <summary>
+        /// Get list of all suppliers
+        /// </summary>
         // GET: api/Supplier
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SupplierDto>>> GetSuppliers()
@@ -39,6 +41,9 @@ namespace FFsmartPlus.Controllers
           var suppliers =  await _context.Suppliers.ToListAsync();
           return _mapper.Map<List<SupplierDto>>(suppliers);
         }
+        /// <summary>
+        /// Get Supplier by ID
+        /// </summary>
 
         // GET: api/Supplier/5
         [HttpGet("{id}")]
@@ -57,7 +62,9 @@ namespace FFsmartPlus.Controllers
 
             return _mapper.Map<SupplierDto>(supplier);
         }
-
+        /// <summary>
+        /// Update a supplier record
+        /// </summary>
         // PUT: api/Supplier/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -92,7 +99,9 @@ namespace FFsmartPlus.Controllers
 
             return NoContent();
         }
-
+        /// <summary>
+        /// Create a new supplier
+        /// </summary>
         // POST: api/Supplier
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -118,6 +127,9 @@ namespace FFsmartPlus.Controllers
             await _context.SaveChangesAsync();
             return CreatedAtAction("GetSupplier", new { id = newSupplier.Id }, supplier);
         }
+        /// <summary>
+        /// Delete a supplier by its ID
+        /// </summary>
 
         // DELETE: api/Supplier/5
         [HttpDelete("{id}")]
