@@ -137,6 +137,15 @@ namespace FFsmartPlus.Controllers
             await _userManager.RemoveFromRoleAsync(user, role);
             return Ok(new Response { Status = "Success", Message = $"{username} removed from {role} successfully!" });
         }
+
+        [HttpDelete]
+        [Route("Delete-User")]
+        public async Task<ActionResult<bool>> DeleteUser(string username)
+        {
+            var user = await _userManager.FindByNameAsync(username);
+            var result =  await _userManager.DeleteAsync(user);
+            return result.Succeeded;
+        }
         /// <summary>
         /// DEV FUNCTION - Registers new user on all role
         /// </summary>

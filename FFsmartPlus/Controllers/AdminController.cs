@@ -34,7 +34,7 @@ public class AdminController : ControllerBase
     [HttpGet("Expiry")]
     public async Task<ActionResult<List<UnitListDto>>> GetExpiredItems()
     {
-        var expiredItems = _context.Units.Where(x => x.ExpiryDate <= DateTime.Today).ToList();
+        var expiredItems = ExpiredItems();
         return _mapper.Map<List<UnitListDto>>(expiredItems);
     }
     /// <summary>
@@ -43,7 +43,7 @@ public class AdminController : ControllerBase
     [HttpDelete("EndOfDay")]
     public async Task<ActionResult> EndOfDay()
     {
-        var expiredItems = _context.Units.Where(x => x.ExpiryDate <= DateTime.Today).ToList();
+        var expiredItems = await ExpiredItems();
         foreach (var expiredItem in expiredItems)
         {
             AuditUnit auditUnit = new AuditUnit()
@@ -63,5 +63,10 @@ public class AdminController : ControllerBase
         _context.Units.RemoveRange(UnitsToRemove);
         _context.SaveChangesAsync();
         return NoContent();
-    } 
+    }
+
+    private async Task<List<Unit>> ExpiredItems()
+    {
+       return _context.Units.Where(x => x.ExpiryDate <= DateTime.Today).ToList();
+    }
 }
