@@ -45,7 +45,7 @@ public class OrdersController : ControllerBase
                 Id = item.Id,
                 Name = item.Name,
                 UnitDesc = item.UnitDesc,
-                OrderQuantity = item.minimumStock - await GetCurrentStock(item)
+                OrderQuantity = item.desiredStock - await GetCurrentStock(item)
             };
             var exisitingSupplier = Orders.FirstOrDefault(x => x.supplierId.Equals(item.SupplierId));
             if (exisitingSupplier != null)

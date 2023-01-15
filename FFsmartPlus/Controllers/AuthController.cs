@@ -11,7 +11,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Application.Auth;
+using Infrastructure;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace FFsmartPlus.Controllers
 {
@@ -22,15 +24,28 @@ namespace FFsmartPlus.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
+        private readonly FridgeAppContext _context;
+
 
         public AuthenticateController(
             UserManager<IdentityUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            FridgeAppContext context)
         {
+            _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
+        }
+
+        /// <summary>
+        ///  Gets all users
+        /// </summary>
+        [HttpGet("/all")]
+        public async Task<ActionResult<List<string>>> GetUsers()
+        {
+            return await _context.Users.Select(x => x.UserName).ToListAsync();
         }
         /// <summary>
         /// User Login 
