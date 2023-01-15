@@ -28,6 +28,7 @@ namespace Infrastructure
         public DbSet<Unit> Units { get; set; }
         public DbSet<AuditUnit> AuditUnits { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
+        public DbSet<OrderLog> OrderLogs { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //optionsBuilder.UseSqlServer(@"Server=JPC\SQLEXPRESS;Database=AAD1;User=user1;Password=Password1;Trust Server Certificate=True");
@@ -49,7 +50,7 @@ namespace Infrastructure
             modelBuilder.Entity<Supplier>().HasData((new Supplier() 
                 {Id = 1, Name = "Fruit Supplier Inc", Address = "TestingABC", Email = "Email@test.com"}));
             modelBuilder.Entity<Item>().HasData((new Item
-                { Id = 1, Name = "Tomatoes", UnitDesc = "Per Tomato", Active = true, SupplierId = 1, minimumStock = 10}));
+                { Id = 1, Name = "Tomatoes", UnitDesc = "Per Tomato", Active = true, SupplierId = 1, minimumStock = 10, desiredStock = 30}));
             modelBuilder.Entity<Unit>().HasData((new Unit
                 { Id = 1, Quantity = 3, ExpiryDate = new DateTime(2022, 03, 11), ItemId = 1}));
                         base.OnModelCreating(modelBuilder);

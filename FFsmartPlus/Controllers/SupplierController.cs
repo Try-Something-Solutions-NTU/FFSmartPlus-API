@@ -21,7 +21,6 @@ namespace FFsmartPlus.Controllers
         private readonly IMapper _mapper;
         private readonly SupplierValidator _supplierValidator;
 
-
         public SupplierController(FridgeAppContext context, IMapper mapper)
         {
             _context = context;

@@ -8,6 +8,7 @@ using Application.Item;
 using Application.Unit;
 using AutoMapper;
 using Domain;
+using FFsmartPlus.Services;
 using Infrastructure;
 using Infrastructure.Auth;
 using Microsoft.AspNetCore.Authorization;
@@ -17,17 +18,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FFsmartPlus.Controllers
 {
-    [Authorize(Roles = UserRoles.Chef)]
     [Route("api/Item/{id}/[controller]")]
     [ApiController]
     public class StockController : ControllerBase
     {
         private readonly FridgeAppContext _context;
         private readonly IMapper _mapper;
+        private readonly IStockService _stockService;
         
-        public StockController(FridgeAppContext context, IMapper mapper)
+        public StockController(FridgeAppContext context, IMapper mapper, IStockService stockService)
         {
             _context = context;
+            _stockService = stockService;
             _mapper = mapper;
         }
         /// <summary>
@@ -49,40 +51,15 @@ namespace FFsmartPlus.Controllers
         /// </summary>
         //POST: api/item/{id}/Stock/Add
         [HttpPost("Add")]
-        public async Task<ActionResult<bool>> AddStock(long id, NewUnitDto newUnits)
+        public async Task<ActionResult<bool>> AddStockRequest(long id, NewUnitDto newUnits)
         {
-            
-            Domain.Item item = await _context.Items.FindAsync(id);
-            await _context.Entry(item).Collection(i => i.Units).LoadAsync();
-            Domain.Unit unit = item.Units.FirstOrDefault(x => x.ExpiryDate.Equals(newUnits.ExpiryDate));
-            // try
-            // {
-                AuditUnit auditUnit = new AuditUnit()
-                {
-                    EventDateTime = DateTime.Now,
-                    Activity = Activity.Added,
-                    Quantity = newUnits.Quantity,
-                    ExpiryDate = newUnits.ExpiryDate,
-                    ItemId = id,
-                    Item = item,
-                    UserName = User.Identity.Name
-                };
-                _context.AuditUnits.Add(auditUnit);
-                
-                if (unit is null)
-                {
-                    var newUnit = _mapper.Map<Domain.Unit>(newUnits);
-                    newUnit.Item = item;
-                    newUnit.ItemId = id;
-                    item.Units.Add(newUnit);
-                }
-                else
-                {
-                    unit.Quantity = newUnits.Quantity + unit.Quantity;
-                    _context.Entry(unit).State = EntityState.Modified;
-                }
-                await _context.SaveChangesAsync();
-                return true;
+            var UserName = User.Identity.Name;
+            if (UserName is null)
+            {
+                return false;
+            }
+            return await _stockService.AddStock(id,newUnits,UserName);
+
             // }
             // catch(Exception ex)
             // {

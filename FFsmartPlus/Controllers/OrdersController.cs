@@ -2,6 +2,7 @@ using Application.Item;
 using Application.Orders;
 using AutoMapper;
 using Domain;
+using FFsmartPlus.Services;
 using Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,10 +15,12 @@ public class OrdersController : ControllerBase
 {
     private readonly FridgeAppContext _context;
     private readonly IMapper _mapper;
+    public readonly IStockService _StockService;
 
-    public OrdersController(FridgeAppContext context, IMapper mapper)
+    public OrdersController(FridgeAppContext context, IMapper mapper, IStockService stockService)
     {
         _context = context;
+        _StockService = stockService;
         _mapper = mapper;
     }
     /// <summary>
@@ -70,7 +73,44 @@ public class OrdersController : ControllerBase
 
         return Orders;
     }
-  
+
+    [HttpPost("ConfirmOrder")]
+    public async Task<ActionResult<bool>> ConfirmOrder(IEnumerable<SupplierOrderDto> orders)
+    {
+        foreach (var supplier in orders)
+        {
+            foreach (var order in supplier.Orders)
+            {
+                _context.OrderLogs.Add(new OrderLog()
+                {
+                    ItemId = order.Id,
+                    SupplierId = supplier.supplierId,
+                    orderDate = DateTime.Now,
+                    OrderDelivered = false,
+                    Quantity = order.OrderQuantity
+                });
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        return true;
+    }
+
+    [HttpPost("Confirm")]
+    public async Task<ActionResult<bool>> ConfirmDeliver(OrderConfirmationDTO confirmationDto)
+    {
+        //TODO change to use User.Identity.Name and error handleing d
+        var username = "Nick";
+        OrderLog order = await _context.OrderLogs.FindAsync(confirmationDto.OrderLogId);
+        await _StockService.AddStock((long)order.ItemId, confirmationDto.unitDeliver, username);
+        order.actualDelivered = confirmationDto.unitDeliver.Quantity;
+        order.DeliverDate = DateTime.Now;
+        order.OrderDelivered = true;
+        _context.Entry(order).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+        return true;
+    } 
+
     private async Task<double> GetCurrentStock(Item item)
     {
         await _context.Entry(item).Collection(i => i.Units).LoadAsync();
