@@ -42,7 +42,7 @@ namespace FFsmartPlus.Controllers
         /// <summary>
         ///  Gets all users
         /// </summary>
-        [HttpGet("/all")]
+        [HttpGet("all")]
         public async Task<ActionResult<List<string>>> GetUsers()
         {
             return await _context.Users.Select(x => x.UserName).ToListAsync();
