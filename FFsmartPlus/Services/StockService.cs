@@ -2,6 +2,7 @@ using Application.Unit;
 using AutoMapper;
 using Domain;
 using Infrastructure;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace FFsmartPlus.Services;
@@ -19,6 +20,10 @@ public class StockService : IStockService
     public async Task<bool> AddStock(long id, NewUnitDto newUnits, string username)
     {
         Domain.Item item = await _context.Items.FindAsync(id);
+        if (item is null)
+        {
+            throw new Exception();
+        }
         await _context.Entry(item).Collection(i => i.Units).LoadAsync();
         Domain.Unit unit = item.Units.FirstOrDefault(x => x.ExpiryDate.Equals(newUnits.ExpiryDate));
         // try

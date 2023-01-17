@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain;
+using FFsmartPlus.Services;
 using FluentValidation.Results;
 using Infrastructure;
 
@@ -15,10 +16,13 @@ public class DeliveryController : ControllerBase
 {
     private readonly FridgeAppContext _context;
     private readonly IMapper _mapper;
+    private readonly IStockService _stockService;
 
-    public DeliveryController(FridgeAppContext context, IMapper mapper)
+
+    public DeliveryController(FridgeAppContext context, IMapper mapper, IStockService stockService)
     {
         _context = context;
+        _stockService = stockService;
         _mapper = mapper;
     }
 
@@ -42,5 +46,23 @@ public class DeliveryController : ControllerBase
 
         return new ActiveOrdersDto() { orderDate = date, orders = list};
     }
+    /// <summary>
+    /// confirms item has been delivered and records it
+    /// </summary>
+
+    [HttpPut("Confirm")]
+    public async Task<ActionResult<bool>> ConfirmDeliver(OrderConfirmationDTO confirmationDto)
+    {
+        //TODO change to use User.Identity.Name and error handleing 
+        var username = "Nick";
+        OrderLog order = await _context.OrderLogs.FindAsync(confirmationDto.OrderLogId);
+        await _stockService.AddStock((long)order.ItemId, confirmationDto.unitDeliver, username);
+        order.actualDelivered = confirmationDto.unitDeliver.Quantity;
+        order.DeliverDate = DateTime.Now;
+        order.OrderDelivered = true;
+        _context.Entry(order).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+        return true;
+    } 
 
 }

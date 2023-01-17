@@ -37,10 +37,18 @@ namespace FFsmartPlus.Controllers
         /// </summary>
         //GET: api/item/{id}/Stock
         [HttpGet("")]
+        [ProducesResponseType(typeof(CurrentStockDto), 200)]
+        [ProducesResponseType( 404)]
         public async Task<ActionResult<CurrentStockDto>> GetCurrentStock(long id)
         {
             var currentStock = new CurrentStockDto();
             Domain.Item item = await _context.Items.FindAsync(id);
+            if (item is null)
+            {
+                return NotFound();
+                
+            }
+            
             await _context.Entry(item).Collection(i => i.Units).LoadAsync();
             currentStock.currentQuantity = item.Units.Select(x => x.Quantity).Sum();
             currentStock.item = _mapper.Map<ItemDto>(item);
@@ -50,16 +58,34 @@ namespace FFsmartPlus.Controllers
         /// Add units to stock 
         /// </summary>
         //POST: api/item/{id}/Stock/Add
+        [ProducesResponseType(typeof(bool), 200)]
+        [ProducesResponseType( 404)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(400)]
+        [Authorize]
         [HttpPost("Add")]
         public async Task<ActionResult<bool>> AddStockRequest(long id, NewUnitDto newUnits)
         {
             var UserName = User.Identity.Name;
             if (UserName is null)
             {
-                return false;
+                return BadRequest("User not Found");
             }
-            return await _stockService.AddStock(id,newUnits,UserName);
 
+            try
+            {
+                var result = await _stockService.AddStock(id, newUnits, UserName);
+                if (result == false)
+                {
+                    return BadRequest();
+                }
+
+                return new OkObjectResult(result);
+            }
+            catch
+            {
+                return BadRequest();
+            }
             // }
             // catch(Exception ex)
             // {
@@ -69,10 +95,18 @@ namespace FFsmartPlus.Controllers
         /// <summary>
         /// Remove units from stock following FIFO
         /// </summary>
+        /// [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(bool), 200)]
+        [ProducesResponseType( 404)]
         [HttpPost("Remove")] 
         public async Task<ActionResult<bool>> RemoveStock(long id, double Quantity)
          {
              Domain.Item item = await _context.Items.FindAsync(id);
+             if (item is null)
+             {
+                 NotFound();
+                 
+             }
              await _context.Entry(item).Collection(i => i.Units).LoadAsync();
              item.Units = item.Units.ToList();
               

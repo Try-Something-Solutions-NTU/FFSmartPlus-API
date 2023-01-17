@@ -67,6 +67,8 @@ namespace FFsmartPlus.Controllers
         /// </summary>
         [ProducesResponseType(200)]
         [ProducesResponseType(typeof(ValidationResult), 400)]
+        [ProducesResponseType( 404)]
+
         // PUT: api/Item/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
