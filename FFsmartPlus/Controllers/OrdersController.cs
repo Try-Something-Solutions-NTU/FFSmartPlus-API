@@ -28,10 +28,19 @@ public class OrdersController : ControllerBase
     /// </summary>
     //Get: api/Orders/BelowMin
     [HttpGet("BelowMin")]
-    public async Task<ActionResult<IEnumerable<ItemDto>>> GetItemsBelowMinStock()
+    public async Task<ActionResult<IEnumerable<CurrentStockDto>>> GetItemsBelowMinStock()
     {
         var lowStockItems = await  GetItemBelowMiniumStock();
-        return _mapper.Map<List<ItemDto>>(lowStockItems);
+        var list = new List<CurrentStockDto>();
+        foreach (var item in lowStockItems)
+        {
+            await _context.Entry(item).Collection(i => i.Units).LoadAsync();
+            var currentStock = item.Units.Select(x => x.Quantity).Sum();
+            var itemDto = _mapper.Map<ItemDto>(item);
+            list.Add(new CurrentStockDto(){item = itemDto, currentQuantity = currentStock});
+        }
+
+        return list;
     }
     /// <summary>
     /// Generates an order of items below the minimum stock level
@@ -95,21 +104,26 @@ public class OrdersController : ControllerBase
 
         return true;
     }
-
-    [HttpPost("Confirm")]
-    public async Task<ActionResult<bool>> ConfirmDeliver(OrderConfirmationDTO confirmationDto)
+    [HttpPost("ConfirmOrderByIDs")]
+    public async Task<ActionResult<bool>> ConfirmOrderByIDs(OrderRequestDto orderRequest)
     {
-        //TODO change to use User.Identity.Name and error handleing d
-        var username = "Nick";
-        OrderLog order = await _context.OrderLogs.FindAsync(confirmationDto.OrderLogId);
-        await _StockService.AddStock((long)order.ItemId, confirmationDto.unitDeliver, username);
-        order.actualDelivered = confirmationDto.unitDeliver.Quantity;
-        order.DeliverDate = DateTime.Now;
-        order.OrderDelivered = true;
-        _context.Entry(order).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
+        foreach (var order in orderRequest.Items)
+            {
+                _context.OrderLogs.Add(new OrderLog()
+                {
+                    ItemId = order.Id,
+                    //SupplierId = supplier.Id,
+                    orderDate = DateTime.Now,
+                    OrderDelivered = false,
+                    Quantity = order.quantity
+                });
+                await _context.SaveChangesAsync();
+            }
+
         return true;
-    } 
+    }
+
+   
 
     private async Task<double> GetCurrentStock(Item item)
     {
