@@ -70,12 +70,14 @@ namespace FFsmartPlus.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(SupplierDto), 200)]
         [ProducesResponseType(typeof(ValidationResult), 400)]
-        public async Task<IActionResult> PutSupplier(long id, Supplier supplier)
+        public async Task<IActionResult> PutSupplier(long id, SupplierDto supplierDto)
         {
-            if (id != supplier.Id)
+            if (!SupplierExists(id))
             {
-                return BadRequest();
+                return NotFound();
             }
+
+            var supplier = _mapper.Map<Supplier>(supplierDto);
             var validatorResult = await _supplierValidator.ValidateAsync(supplier);
             if (!validatorResult.IsValid)
             {
@@ -107,9 +109,9 @@ namespace FFsmartPlus.Controllers
         // POST: api/Supplier
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        [ProducesResponseType(typeof(SupplierDto), 200)]
+        [ProducesResponseType(typeof(SupplierDto), 201)]
         [ProducesResponseType(typeof(ValidationResult), 400)]
-        public async Task<ActionResult<Supplier>> PostSupplier(NewSupplierDto supplier)
+        public async Task<ActionResult<SupplierDto>> PostSupplier(NewSupplierDto supplier)
         {
           if (_context.Suppliers == null)
           {
@@ -129,7 +131,7 @@ namespace FFsmartPlus.Controllers
           }
           _context.Suppliers.Add(newSupplier);
             await _context.SaveChangesAsync();
-            return CreatedAtAction("GetSupplier", new { id = newSupplier.Id }, supplier);
+            return CreatedAtAction("GetSupplier", new { Id = newSupplier.Id }, newSupplier);
         }
         /// <summary>
         /// Delete a supplier by its ID
