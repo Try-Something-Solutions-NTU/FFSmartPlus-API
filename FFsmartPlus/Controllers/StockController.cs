@@ -42,7 +42,7 @@ namespace FFsmartPlus.Controllers
         public async Task<ActionResult<CurrentStockDto>> GetCurrentStock(long id)
         {
             var currentStock = new CurrentStockDto();
-            Domain.Item item = await _context.Items.FindAsync(id);
+            var item = await _context.Items.FindAsync(id);
             if (item is null)
             {
                 return NotFound();

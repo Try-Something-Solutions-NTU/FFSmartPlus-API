@@ -75,6 +75,10 @@ namespace FFsmartPlus.Controllers
         public async Task<IActionResult> PutItem(long id, ItemDto putItem)
         {
             var test = ItemActive(id);
+            if (!ItemExists(id))
+            {
+                return NotFound();
+            }
             if (id != putItem.Id || !ItemActive(id))
             {
                 return BadRequest();
