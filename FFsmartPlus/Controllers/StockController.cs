@@ -95,7 +95,6 @@ namespace FFsmartPlus.Controllers
         /// <summary>
         /// Remove units from stock following FIFO
         /// </summary>
-        /// [ProducesResponseType(200)]
         [ProducesResponseType(typeof(bool), 200)]
         [ProducesResponseType( 404)]
         [HttpPost("Remove")] 
