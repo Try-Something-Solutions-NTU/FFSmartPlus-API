@@ -12,12 +12,12 @@ using Infrastructure;
 using Infrastructure.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace FFsmartPlus.Controllers;
 
-[Authorize(Roles = UserRoles.Admin)]
 [Route("api/[controller]")]
 public class AdminController : ControllerBase
 {
@@ -31,6 +31,10 @@ public class AdminController : ControllerBase
     /// <summary>
     /// Get Expired Items
     /// </summary>
+    [Authorize(Roles = UserRoles.Chef)]
+    [Authorize(Roles = UserRoles.Admin)]
+    [Authorize(Roles = UserRoles.HeadChef)]
+
     [HttpGet("Expiry")]
     public async Task<ActionResult<List<UnitListDto>>> GetExpiredItems()
     {
@@ -40,6 +44,8 @@ public class AdminController : ControllerBase
     /// <summary>
     /// Runs End of day operations
     /// </summary>
+    [Authorize(Roles = UserRoles.Admin)]
+    [Authorize(Roles = UserRoles.HeadChef)]
     [HttpDelete("EndOfDay")]
     public async Task<ActionResult> EndOfDay()
     {

@@ -4,6 +4,8 @@ using AutoMapper;
 using Domain;
 using FFsmartPlus.Services;
 using Infrastructure;
+using Infrastructure.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,6 +29,8 @@ public class OrdersController : ControllerBase
     /// Get list of items below minimum stock level
     /// </summary>
     //Get: api/Orders/BelowMin
+    [Authorize(Roles = UserRoles.Admin)]
+    [Authorize(Roles = UserRoles.HeadChef)]
     [HttpGet("BelowMin")]
     public async Task<ActionResult<IEnumerable<CurrentStockDto>>> GetItemsBelowMinStock()
     {
@@ -45,6 +49,8 @@ public class OrdersController : ControllerBase
     /// <summary>
     /// Generates an order of items below the minimum stock level
     /// </summary>
+    [Authorize(Roles = UserRoles.Admin)]
+    [Authorize(Roles = UserRoles.HeadChef)]
     [HttpGet("BelowMin/GenerateOrder")]
     public async Task<ActionResult<IEnumerable<SupplierOrderDto>>> GetMinimumOrder()
     {
@@ -82,7 +88,12 @@ public class OrdersController : ControllerBase
 
         return Orders;
     }
+    /// <summary>
+    /// Registers and sends the order to suppliers 
+    /// </summary>
 
+    [Authorize(Roles = UserRoles.Admin)]
+    [Authorize(Roles = UserRoles.HeadChef)]
     [HttpPost("ConfirmOrder")]
     public async Task<ActionResult<bool>> ConfirmOrder(IEnumerable<SupplierOrderDto> orders)
     {
@@ -104,6 +115,11 @@ public class OrdersController : ControllerBase
 
         return true;
     }
+    /// <summary>
+    /// Registers and sends orders to suppliers
+    /// </summary>
+    [Authorize(Roles = UserRoles.Admin)]
+    [Authorize(Roles = UserRoles.HeadChef)]
     [HttpPost("ConfirmOrderByIDs")]
     public async Task<ActionResult<bool>> ConfirmOrderByIDs(OrderRequestDto orderRequest)
     {

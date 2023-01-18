@@ -10,10 +10,14 @@ using Microsoft.EntityFrameworkCore;
 using Domain;
 using FluentValidation.Results;
 using Infrastructure;
+using Infrastructure.Auth;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FFsmartPlus.Controllers
 {
     [Route("api/Suppliers/[controller]")]
+    [Authorize(Roles = UserRoles.Admin)]
+    [Authorize(Roles = UserRoles.HeadChef)]
     [ApiController]
     public class SupplierController : ControllerBase
     {

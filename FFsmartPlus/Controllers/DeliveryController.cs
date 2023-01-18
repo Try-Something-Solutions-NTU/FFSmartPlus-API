@@ -8,6 +8,8 @@ using Domain;
 using FFsmartPlus.Services;
 using FluentValidation.Results;
 using Infrastructure;
+using Infrastructure.Auth;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FFsmartPlus.Controllers;
 [Route("api/[controller]")]
@@ -27,6 +29,7 @@ public class DeliveryController : ControllerBase
     }
 
     [HttpGet("{id}/{date}")]
+    [Authorize]
     public async Task<ActionResult<ActiveOrdersDto>> GetActiveOrders(long id, DateTime date)
     { 
         //TODO fix this \/
@@ -51,6 +54,9 @@ public class DeliveryController : ControllerBase
     /// </summary>
 
     [HttpPut("Confirm")]
+    [Authorize(Roles = UserRoles.Delivery)]
+    [Authorize(Roles = UserRoles.Admin)]
+    [Authorize(Roles = UserRoles.HeadChef)]
     public async Task<ActionResult<bool>> ConfirmDeliver(OrderConfirmationDTO confirmationDto)
     {
         //TODO change to use User.Identity.Name and error handleing 

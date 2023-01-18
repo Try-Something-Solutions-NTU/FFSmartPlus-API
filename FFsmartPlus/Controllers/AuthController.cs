@@ -154,6 +154,7 @@ namespace FFsmartPlus.Controllers
         }
 
         [HttpDelete]
+        [Authorize(Roles = UserRoles.Admin)]
         [Route("Delete-User")]
         public async Task<ActionResult<bool>> DeleteUser(string username)
         {

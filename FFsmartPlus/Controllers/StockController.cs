@@ -18,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FFsmartPlus.Controllers
 {
+    [Authorize]
     [Route("api/Item/{id}/[controller]")]
     [ApiController]
     public class StockController : ControllerBase
