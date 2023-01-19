@@ -146,7 +146,7 @@ namespace FFsmartPlus.Controllers
         // POST: api/Item
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        [ProducesResponseType(typeof(ItemDto), 200)]
+        [ProducesResponseType(typeof(ItemDto), 201)]
         [ProducesResponseType(typeof(ValidationResult), 400)]
         public async Task<ActionResult<Item>> PostItem(NewItemDto newItem)
         {
@@ -170,6 +170,7 @@ namespace FFsmartPlus.Controllers
           _context.Items.Add(item);
           await _context.SaveChangesAsync();
 
+           // return NoContent();
             return CreatedAtAction("GetItem", new { id = item.Id }, item);
         }
         /// <summary>
