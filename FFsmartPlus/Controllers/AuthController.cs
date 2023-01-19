@@ -42,7 +42,7 @@ namespace FFsmartPlus.Controllers
         /// <summary>
         ///  Gets all users
         /// </summary>
-        [HttpGet("/all")]
+        [HttpGet("all")]
         public async Task<ActionResult<List<string>>> GetUsers()
         {
             return await _context.Users.Select(x => x.UserName).ToListAsync();
@@ -184,6 +184,8 @@ namespace FFsmartPlus.Controllers
 
             if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
                 await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
+            if (!await _roleManager.RoleExistsAsync(UserRoles.HeadChef))
+                await _roleManager.CreateAsync(new IdentityRole(UserRoles.HeadChef));
             if (!await _roleManager.RoleExistsAsync(UserRoles.Chef))
                 await _roleManager.CreateAsync(new IdentityRole(UserRoles.Chef));
             if (!await _roleManager.RoleExistsAsync(UserRoles.Delivery))
@@ -193,9 +195,13 @@ namespace FFsmartPlus.Controllers
             {
                 await _userManager.AddToRoleAsync(user, UserRoles.Admin);
             }
-            if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
+            if (await _roleManager.RoleExistsAsync(UserRoles.Chef))
             {
                 await _userManager.AddToRoleAsync(user, UserRoles.Chef);
+            }
+            if (await _roleManager.RoleExistsAsync(UserRoles.HeadChef))
+            {
+                await _userManager.AddToRoleAsync(user, UserRoles.HeadChef);
             }
             if (await _roleManager.RoleExistsAsync(UserRoles.Delivery))
             {

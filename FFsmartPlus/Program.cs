@@ -5,6 +5,7 @@ using System.Xml.XPath;
 using AutoMapper;
 using Domain;
 using FFsmartPlus;
+using FFsmartPlus.Services;
 using FluentValidation;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -20,6 +21,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddScoped<IStockService, StockService>();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
 {

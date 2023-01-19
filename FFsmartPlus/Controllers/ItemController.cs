@@ -67,12 +67,18 @@ namespace FFsmartPlus.Controllers
         /// </summary>
         [ProducesResponseType(200)]
         [ProducesResponseType(typeof(ValidationResult), 400)]
+        [ProducesResponseType( 404)]
+
         // PUT: api/Item/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutItem(long id, ItemDto putItem)
         {
             var test = ItemActive(id);
+            if (!ItemExists(id))
+            {
+                return NotFound();
+            }
             if (id != putItem.Id || !ItemActive(id))
             {
                 return BadRequest();

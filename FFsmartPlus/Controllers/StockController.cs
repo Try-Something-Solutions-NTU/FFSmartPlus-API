@@ -8,6 +8,7 @@ using Application.Item;
 using Application.Unit;
 using AutoMapper;
 using Domain;
+using FFsmartPlus.Services;
 using Infrastructure;
 using Infrastructure.Auth;
 using Microsoft.AspNetCore.Authorization;
@@ -17,17 +18,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FFsmartPlus.Controllers
 {
-    [Authorize(Roles = UserRoles.Chef)]
     [Route("api/Item/{id}/[controller]")]
     [ApiController]
     public class StockController : ControllerBase
     {
         private readonly FridgeAppContext _context;
         private readonly IMapper _mapper;
+        private readonly IStockService _stockService;
         
-        public StockController(FridgeAppContext context, IMapper mapper)
+        public StockController(FridgeAppContext context, IMapper mapper, IStockService stockService)
         {
             _context = context;
+            _stockService = stockService;
             _mapper = mapper;
         }
         /// <summary>
@@ -35,10 +37,18 @@ namespace FFsmartPlus.Controllers
         /// </summary>
         //GET: api/item/{id}/Stock
         [HttpGet("")]
+        [ProducesResponseType(typeof(CurrentStockDto), 200)]
+        [ProducesResponseType( 404)]
         public async Task<ActionResult<CurrentStockDto>> GetCurrentStock(long id)
         {
             var currentStock = new CurrentStockDto();
-            Domain.Item item = await _context.Items.FindAsync(id);
+            var item = await _context.Items.FindAsync(id);
+            if (item is null)
+            {
+                return NotFound();
+                
+            }
+            
             await _context.Entry(item).Collection(i => i.Units).LoadAsync();
             currentStock.currentQuantity = item.Units.Select(x => x.Quantity).Sum();
             currentStock.item = _mapper.Map<ItemDto>(item);
@@ -48,41 +58,34 @@ namespace FFsmartPlus.Controllers
         /// Add units to stock 
         /// </summary>
         //POST: api/item/{id}/Stock/Add
+        [ProducesResponseType(typeof(bool), 200)]
+        [ProducesResponseType( 404)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(400)]
+        [Authorize]
         [HttpPost("Add")]
-        public async Task<ActionResult<bool>> AddStock(long id, NewUnitDto newUnits)
+        public async Task<ActionResult<bool>> AddStockRequest(long id, NewUnitDto newUnits)
         {
-            
-            Domain.Item item = await _context.Items.FindAsync(id);
-            await _context.Entry(item).Collection(i => i.Units).LoadAsync();
-            Domain.Unit unit = item.Units.FirstOrDefault(x => x.ExpiryDate.Equals(newUnits.ExpiryDate));
-            // try
-            // {
-                AuditUnit auditUnit = new AuditUnit()
+            var UserName = User.Identity.Name;
+            if (UserName is null)
+            {
+                return BadRequest("User not Found");
+            }
+
+            try
+            {
+                var result = await _stockService.AddStock(id, newUnits, UserName);
+                if (result == false)
                 {
-                    EventDateTime = DateTime.Now,
-                    Activity = Activity.Added,
-                    Quantity = newUnits.Quantity,
-                    ExpiryDate = newUnits.ExpiryDate,
-                    ItemId = id,
-                    Item = item,
-                    UserName = User.Identity.Name
-                };
-                _context.AuditUnits.Add(auditUnit);
-                
-                if (unit is null)
-                {
-                    var newUnit = _mapper.Map<Domain.Unit>(newUnits);
-                    newUnit.Item = item;
-                    newUnit.ItemId = id;
-                    item.Units.Add(newUnit);
+                    return BadRequest();
                 }
-                else
-                {
-                    unit.Quantity = newUnits.Quantity + unit.Quantity;
-                    _context.Entry(unit).State = EntityState.Modified;
-                }
-                await _context.SaveChangesAsync();
-                return true;
+
+                return new OkObjectResult(result);
+            }
+            catch
+            {
+                return BadRequest();
+            }
             // }
             // catch(Exception ex)
             // {
@@ -92,63 +95,26 @@ namespace FFsmartPlus.Controllers
         /// <summary>
         /// Remove units from stock following FIFO
         /// </summary>
+        [ProducesResponseType(typeof(bool), 200)]
+        [ProducesResponseType( 404)]
+        [ProducesResponseType( 400)]
+
         [HttpPost("Remove")] 
         public async Task<ActionResult<bool>> RemoveStock(long id, double Quantity)
          {
-             Domain.Item item = await _context.Items.FindAsync(id);
-             await _context.Entry(item).Collection(i => i.Units).LoadAsync();
-             item.Units = item.Units.ToList();
-              
-             //if you try to remove too many items
-             var test = item.Units.Select(x => x.Quantity).Sum();
-             if (test < Quantity)
+             if (User.Identity.Name is null)
              {
-                 return false;
+                 return BadRequest();
              }
-             do
+
+             try
              {
-                 Unit unit = item.Units.OrderBy(x => x.ExpiryDate).First();
-                 if (unit.Quantity <= Quantity)
-                 {
-                     AuditUnit auditUnit = new AuditUnit()
-                     {
-                         EventDateTime = DateTime.Now,
-                         Activity = Activity.removed,
-                         Quantity = unit.Quantity,
-                         ExpiryDate = unit.ExpiryDate,
-                         ItemId = id,
-                         Item = item,
-                         UserName = User.Identity.Name
-                     };
-                     _context.AuditUnits.Add(auditUnit);
-                     _context.Entry(unit).State = EntityState.Deleted;
-                     item.Units.Remove(unit);
-                     
-                     Quantity = Quantity - unit.Quantity;
-                 }
-                 else
-                 {
-                     AuditUnit auditUnit = new AuditUnit()
-                     {
-                         EventDateTime = DateTime.Now,
-                         Activity = Activity.removed,
-                         Quantity = unit.Quantity,
-                         ExpiryDate = unit.ExpiryDate,
-                         ItemId = id,
-                         Item = item,
-                         UserName = User.Identity.Name
-                     };
-                     _context.AuditUnits.Add(auditUnit);
-
-                     unit.Quantity = unit.Quantity - Quantity;
-                     _context.Entry(unit).State = EntityState.Modified;
-                     Quantity = 0;
-                 }
-
-             } while (Quantity != 0);
-             await _context.SaveChangesAsync();
-
-             return  true;
+                 return await _stockService.RemoveStock(id, Quantity, User.Identity.Name);
+             }
+             catch
+             {
+                 return NotFound();
+             }
          }
 
         
