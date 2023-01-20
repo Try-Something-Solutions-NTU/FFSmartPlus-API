@@ -1,9 +1,11 @@
 using Application.Item;
 using Application.Orders;
+using Application.Supplier;
 using AutoMapper;
 using Domain;
 using FFsmartPlus.Services;
 using Infrastructure;
+using Infrastructure.EmailSender;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,12 +18,14 @@ public class OrdersController : ControllerBase
     private readonly FridgeAppContext _context;
     private readonly IMapper _mapper;
     public readonly IStockService _StockService;
+    public readonly IEmailSender _EmailSender;
 
-    public OrdersController(FridgeAppContext context, IMapper mapper, IStockService stockService)
+    public OrdersController(FridgeAppContext context, IMapper mapper, IStockService stockService, IEmailSender emailSender)
     {
         _context = context;
         _StockService = stockService;
         _mapper = mapper;
+        _EmailSender = emailSender;
     }
     /// <summary>
     /// Get list of items below minimum stock level
@@ -86,6 +90,24 @@ public class OrdersController : ControllerBase
     [HttpPost("ConfirmOrder")]
     public async Task<ActionResult<bool>> ConfirmOrder(IEnumerable<SupplierOrderDto> orders)
     {
+        var ordersConverted = new List<OrderEmailRequest>();
+        foreach (var order in orders)
+        {
+            var ordersList = new List<OrderItem>();
+            foreach (var o in order.Orders)
+            {
+                ordersList.Add( new OrderItem(){Id = o.Id,Name = o.Name, OrderQuantity = o.OrderQuantity, UnitDesc = o.UnitDesc});
+            }
+            ordersConverted.Add( new OrderEmailRequest(){Email = order.Email, Address = order.Address, Orders = ordersList, Name = order.Name, supplierId = order.supplierId});
+        }
+        try
+        {
+            _EmailSender.SendOrderEmails(ordersConverted);
+        }
+        catch
+        {
+            return BadRequest();
+        }
         foreach (var supplier in orders)
         {
             foreach (var order in supplier.Orders)

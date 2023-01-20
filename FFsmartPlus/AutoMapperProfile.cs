@@ -1,5 +1,6 @@
 using Application.Fridge;
 using Application.Item;
+using Application.Orders;
 using Application.Supplier;
 using Application.Unit;
 using AutoMapper;
@@ -24,6 +25,7 @@ public class AutoMapperProfile : Profile
         CreateMap<Supplier, SupplierDto>();
         CreateMap<SupplierDto, Supplier>();
         CreateMap<NewSupplierDto, Supplier>();
+        CreateMap<IEnumerable<SupplierOrderDto>, IEnumerable<OrderEmailRequest>>();
         // Use CreateMap... Etc.. here (Profile methods are the same as configuration methods)
     }
 }
