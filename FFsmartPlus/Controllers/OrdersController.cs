@@ -129,9 +129,66 @@ public class OrdersController : ControllerBase
     [HttpPost("ConfirmOrderByIDs")]
     public async Task<ActionResult<bool>> ConfirmOrderByIDs(OrderRequestDto orderRequest)
     {
+        var ordersConverted = new List<OrderEmailRequest>();
         foreach (var order in orderRequest.Items)
+        {
+            try
             {
-                _context.OrderLogs.Add(new OrderLog()
+                CheckForDuplicateIds(orderRequest);
+            }
+            catch
+            {
+                return BadRequest("Duplicate IDs");
+            }
+            var item = await _context.Items.FindAsync(order.Id);
+            if (item is null)
+            {
+                return BadRequest("Item not found");
+            }
+
+            var supplierOrder = ordersConverted.FirstOrDefault(x => x.supplierId == item.SupplierId);
+            await _context.Entry(item).Reference(i => i.Supplier).LoadAsync();
+            if (supplierOrder is null)
+            {
+                var neworder = new OrderEmailRequest()
+                {
+                    Address = item.Supplier.Address, 
+                    Email = item.Supplier.Email, 
+                    Name = item.Supplier.Name,
+                    supplierId = item.SupplierId,
+                    Orders = new List<OrderItem>
+                    {
+                        new OrderItem()
+                        {
+                            Id = item.Id,
+                            OrderQuantity = order.quantity,
+                            Name = item.Name,
+                            UnitDesc = item.UnitDesc
+                        }
+                    }
+                };
+                ordersConverted.Add(neworder);
+            }
+            else
+            {
+                supplierOrder.Orders.Add(new OrderItem()
+                {
+                    Id = item.Id,
+                    OrderQuantity = order.quantity,
+                    Name = item.Name,
+                    UnitDesc = item.UnitDesc
+                });
+            }
+            try
+            {
+                _EmailSender.SendOrderEmails(ordersConverted);
+            }
+            catch
+            {
+                return BadRequest();
+            }
+
+            _context.OrderLogs.Add(new OrderLog()
                 {
                     ItemId = order.Id,
                     //SupplierId = supplier.Id,
@@ -140,11 +197,21 @@ public class OrdersController : ControllerBase
                     Quantity = order.quantity
                 });
                 await _context.SaveChangesAsync();
-            }
+        }
 
         return true;
     }
-
+    private void CheckForDuplicateIds(OrderRequestDto list)
+    {
+        var ids = new HashSet<long>();
+        foreach (var obj in list.Items)
+        {
+            if (!ids.Add(obj.Id))
+            {
+                throw new Exception($"Duplicate ID found: {obj.Id}");
+            }
+        }
+    }
    
 
     private async Task<double> GetCurrentStock(Item item)
