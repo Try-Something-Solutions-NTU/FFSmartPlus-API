@@ -83,6 +83,10 @@ namespace FFsmartPlus.Controllers
             {
                 return BadRequest();
             }
+            if (!SupplierExists(putItem.SupplierId))
+            {
+                return BadRequest("The supplier provided does not exist");
+            }
             
             var item = _mapper.Map<Item>(putItem);
             var validatorResult = await _itemValidator.ValidateAsync(item);
@@ -160,7 +164,11 @@ namespace FFsmartPlus.Controllers
           {
               return Problem("Entity set 'FridgeAppContext.Items'  is null.");
           }
-          
+
+          if (!SupplierExists(newItem.SupplierId))
+          {
+              return BadRequest("The supplier provided does not exist");
+          }
           var item = new Item
           {
               Name = newItem.Name,
@@ -206,6 +214,10 @@ namespace FFsmartPlus.Controllers
         private bool ItemExists(long id)
         {
             return (_context.Items?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+        private bool SupplierExists(long id)
+        {
+            return (_context.Suppliers?.Any(e => e.Id == id)).GetValueOrDefault();
         }
         private bool ItemActive(long id)
         {
