@@ -161,7 +161,10 @@ namespace FFsmartPlus.Controllers
         [Route("Delete-User")]
         public async Task<ActionResult<bool>> DeleteUser(string username)
         {
+            
             var user = await _userManager.FindByNameAsync(username);
+            if (user == null)
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User does not exist!" });
             var result =  await _userManager.DeleteAsync(user);
             return result.Succeeded;
         }
