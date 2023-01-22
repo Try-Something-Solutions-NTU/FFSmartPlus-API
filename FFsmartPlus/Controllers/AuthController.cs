@@ -86,12 +86,16 @@ namespace FFsmartPlus.Controllers
         /// Register user
         /// </summary>
         [HttpPost]
+        [ProducesResponseType( 401)]
+        [ProducesResponseType( 500)]
+        [ProducesResponseType( 201)]
+
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
             var userExists = await _userManager.FindByNameAsync(model.Username);
             if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "User already exists!" });
 
             IdentityUser user = new()
             {
@@ -103,7 +107,7 @@ namespace FFsmartPlus.Controllers
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
 
-            return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+            return StatusCode(StatusCodes.Status201Created,new Response { Status = "Success", Message = "User created successfully!" });
         }
         /// <summary>
         /// Admin function to add user to role
