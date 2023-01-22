@@ -65,6 +65,53 @@ public class AdminController : ControllerBase
         return NoContent();
     }
 
+    [HttpGet("Audit")]
+    public async Task<ActionResult> AuditGeneration(int history)
+    {
+        var auditUnits = _context.AuditUnits
+            .Include(au => au.Item)
+            .OrderBy(au => au.EventDateTime)
+            .Where(au => au.ExpiryDate <= DateTime.Today.AddDays(-history))
+            .ToList();
+
+        // Generate report
+        var report = new List<string>();
+        report.Add("ID, Quantity, Expiry Date, Item, Activity, Event Date, User");
+        foreach (var auditUnit in auditUnits)
+        {
+            var row = $"{auditUnit.Id}, {auditUnit.Quantity}, {auditUnit.ExpiryDate.ToShortDateString()}, {auditUnit.Item.Name}, {auditUnit.Activity}, {auditUnit.EventDateTime.ToShortDateString()}, {auditUnit.UserName}";
+            report.Add(row);
+        }
+        return Ok(report);
+        // returns as a CSV, Setup for download?
+    }
+    [HttpGet("Audit/{id}")]
+    public async Task<ActionResult> AuditGeneration(long id, int history)
+    {
+        if (await _context.Items.FindAsync(id) is null)
+        {
+            return NotFound();
+        }
+        var auditUnits = _context.AuditUnits
+            .Include(au => au.Item)
+            .OrderBy(au => au.EventDateTime)
+            .Where(au => au.Item.Id.Equals(id) && au.ExpiryDate <= DateTime.Today.AddDays(-history))
+            .ToList();
+
+        // Generate report
+        var report = new List<string>();
+        report.Add("ID, Quantity, Expiry Date, Item, Activity, Event Date, User");
+        foreach (var auditUnit in auditUnits)
+        {
+            var row = $"{auditUnit.Id}, {auditUnit.Quantity}, {auditUnit.ExpiryDate.ToShortDateString()}, {auditUnit.Item.Name}, {auditUnit.Activity}, {auditUnit.EventDateTime.ToShortDateString()}, {auditUnit.UserName}";
+            report.Add(row);
+        }
+
+        return Ok(report);
+        // Do something with the report
+    
+    }
+
     private async Task<List<Unit>> ExpiredItems()
     {
        return _context.Units.Where(x => x.ExpiryDate <= DateTime.Today).ToList();
