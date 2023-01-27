@@ -1,12 +1,10 @@
-namespace Domain;
+namespace Application.Orders;
 
-public class OrderLog
+public class OrderDto
 {
     public long Id { get; set; }
     public long? ItemId { get; set; }
-    public Item? Item { get; set; }
     public long? SupplierId { get; set; }
-    public Supplier? Supplier { get; set; }
     public DateTime orderDate { get; set; }
     public double Quantity { get; set; }
     public double? actualDelivered { get; set; }

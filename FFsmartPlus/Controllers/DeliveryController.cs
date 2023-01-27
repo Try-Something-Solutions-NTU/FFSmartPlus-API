@@ -28,9 +28,8 @@ public class DeliveryController : ControllerBase
 
     [HttpGet("{id}/{date}")]
     public async Task<ActionResult<ActiveOrdersDto>> GetActiveOrders(long id, DateTime date)
-    { 
-        //TODO fix this \/
-        var orderLogs = _context.OrderLogs.Where(x => x.SupplierId == id && x.OrderDelivered ==false && x.orderDate.Date.DayOfYear == date.Date.DayOfYear  ).Include(x => x.Item).ToList();
+    {
+        var orderLogs = _context.OrderLogs.Where(x => x.SupplierId == id && x.OrderDelivered ==false && x.orderDate.Date.DayOfYear == date.Date.DayOfYear && x.orderDate.Date.Year == date.Date.Year).Include(x => x.Item).ToList();
         var list = new List<ActiveOrderDto>();
         foreach (var order in orderLogs)
         {
@@ -63,6 +62,20 @@ public class DeliveryController : ControllerBase
         _context.Entry(order).State = EntityState.Modified;
         await _context.SaveChangesAsync();
         return true;
-    } 
+    }
+
+    [HttpGet("/OrdersByDate/{date}")]
+    public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrdersByDate(DateTime date)
+    {
+        var orderLogs = _context.OrderLogs.Where(x => x.orderDate.Date.DayOfYear == date.Date.DayOfYear  ).Include(x => x.Item).ToList();
+        if (orderLogs is null)
+            return NotFound();
+        var orders = new List<OrderDto>();
+        foreach (var o in orderLogs)
+        {
+            orders.Add(_mapper.Map<OrderDto>(o));
+        }
+        return Ok(orders);
+    }
 
 }
