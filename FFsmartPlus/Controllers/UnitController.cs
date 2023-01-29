@@ -2,13 +2,14 @@ using Application.Unit;
 using AutoMapper;
 using Infrastructure;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Unit = Domain.Unit;
 
 namespace FFsmartPlus.Controllers;
 
-
+    [Authorize]
     [Route("api/Item/{id}/[controller]")]
     [ApiController]
     public class UnitController
