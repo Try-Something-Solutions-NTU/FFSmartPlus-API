@@ -98,68 +98,24 @@ namespace FFsmartPlus.Controllers
         /// </summary>
         [ProducesResponseType(typeof(bool), 200)]
         [ProducesResponseType( 404)]
+        [ProducesResponseType( 400)]
+
         [HttpPost("Remove")] 
         public async Task<ActionResult<bool>> RemoveStock(long id, double Quantity)
          {
-             Domain.Item item = await _context.Items.FindAsync(id);
-             if (item is null)
+             if (User.Identity.Name is null)
              {
-                 NotFound();
-                 
+                 return BadRequest();
              }
-             await _context.Entry(item).Collection(i => i.Units).LoadAsync();
-             item.Units = item.Units.ToList();
-              
-             //if you try to remove too many items
-             var test = item.Units.Select(x => x.Quantity).Sum();
-             if (test < Quantity)
+
+             try
              {
-                 return false;
+                 return await _stockService.RemoveStock(id, Quantity, User.Identity.Name);
              }
-             do
+             catch
              {
-                 Unit unit = item.Units.OrderBy(x => x.ExpiryDate).First();
-                 if (unit.Quantity <= Quantity)
-                 {
-                     AuditUnit auditUnit = new AuditUnit()
-                     {
-                         EventDateTime = DateTime.Now,
-                         Activity = Activity.removed,
-                         Quantity = unit.Quantity,
-                         ExpiryDate = unit.ExpiryDate,
-                         ItemId = id,
-                         Item = item,
-                         UserName = User.Identity.Name
-                     };
-                     _context.AuditUnits.Add(auditUnit);
-                     _context.Entry(unit).State = EntityState.Deleted;
-                     item.Units.Remove(unit);
-                     
-                     Quantity = Quantity - unit.Quantity;
-                 }
-                 else
-                 {
-                     AuditUnit auditUnit = new AuditUnit()
-                     {
-                         EventDateTime = DateTime.Now,
-                         Activity = Activity.removed,
-                         Quantity = unit.Quantity,
-                         ExpiryDate = unit.ExpiryDate,
-                         ItemId = id,
-                         Item = item,
-                         UserName = User.Identity.Name
-                     };
-                     _context.AuditUnits.Add(auditUnit);
-
-                     unit.Quantity = unit.Quantity - Quantity;
-                     _context.Entry(unit).State = EntityState.Modified;
-                     Quantity = 0;
-                 }
-
-             } while (Quantity != 0);
-             await _context.SaveChangesAsync();
-
-             return  true;
+                 return NotFound();
+             }
          }
 
         

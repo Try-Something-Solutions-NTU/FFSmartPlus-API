@@ -4,6 +4,7 @@ using Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Unit = Domain.Unit;
 
 namespace FFsmartPlus.Controllers;
@@ -29,17 +30,15 @@ namespace FFsmartPlus.Controllers;
         public async Task<ActionResult<List<UnitsDto>>> getUnitsDto(long id)
         {
             Domain.Item item = await _context.Items.FindAsync(id);
+            if (item is null)
+                return  new NotFoundResult(); 
             await _context.Entry(item).Collection(i => i.Units).LoadAsync();
-            var unitList = new List<UnitsDto>();
-            foreach(Unit i in item.Units)
-            {
-                unitList.Add(new UnitsDto()
-                {
-                    ExpiryDate = i.ExpiryDate,
-                    Quantity = i.Quantity
-                });
-            }
-
+            var unitList = await _context.Units
+                .Where(u => u.ItemId == id)
+                .Select(u => new UnitsDto() { ExpiryDate = u.ExpiryDate, Quantity = u.Quantity })
+                .ToListAsync();
+            if (item.Units.Count == 0)
+                return  new NotFoundResult();
             return unitList;
         }
     }

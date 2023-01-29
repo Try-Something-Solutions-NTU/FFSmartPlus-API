@@ -8,6 +8,7 @@ using FFsmartPlus;
 using FFsmartPlus.Services;
 using FluentValidation;
 using Infrastructure;
+using Infrastructure.EmailSender;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Logging;
@@ -22,6 +23,7 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<IStockService, StockService>();
+builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
 {

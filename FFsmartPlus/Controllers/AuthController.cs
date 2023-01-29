@@ -86,12 +86,16 @@ namespace FFsmartPlus.Controllers
         /// Register user
         /// </summary>
         [HttpPost]
+        [ProducesResponseType( 401)]
+        [ProducesResponseType( 500)]
+        [ProducesResponseType( 201)]
+
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
             var userExists = await _userManager.FindByNameAsync(model.Username);
             if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "User already exists!" });
 
             IdentityUser user = new()
             {
@@ -99,11 +103,12 @@ namespace FFsmartPlus.Controllers
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Username
             };
+            
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
 
-            return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+            return StatusCode(StatusCodes.Status201Created,new Response { Status = "Success", Message = "User created successfully!" });
         }
         /// <summary>
         /// Admin function to add user to role
@@ -118,7 +123,7 @@ namespace FFsmartPlus.Controllers
         {
             if (!await _roleManager.RoleExistsAsync(role))
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Role does not exist!" });
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "Role does not exist!" });
 
             }
             var user = await _userManager.FindByNameAsync(username);
@@ -142,7 +147,7 @@ namespace FFsmartPlus.Controllers
         {
             if (!await _roleManager.RoleExistsAsync(role))
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Role does not exist!" });
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "Role does not exist!" });
             }
             var user = await _userManager.FindByNameAsync(username);
             if (user == null)
@@ -152,13 +157,18 @@ namespace FFsmartPlus.Controllers
             await _userManager.RemoveFromRoleAsync(user, role);
             return Ok(new Response { Status = "Success", Message = $"{username} removed from {role} successfully!" });
         }
-
+        /// <summary>
+        /// Deletes A user
+        /// </summary>
         [HttpDelete]
         [Authorize(Roles = UserRoles.Admin)]
         [Route("Delete-User")]
         public async Task<ActionResult<bool>> DeleteUser(string username)
         {
+            
             var user = await _userManager.FindByNameAsync(username);
+            if (user == null)
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "User does not exist!" });
             var result =  await _userManager.DeleteAsync(user);
             return result.Succeeded;
         }
@@ -171,7 +181,7 @@ namespace FFsmartPlus.Controllers
         {
             var userExists = await _userManager.FindByNameAsync(model.Username);
             if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "User already exists!" });
 
             IdentityUser user = new()
             {

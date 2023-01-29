@@ -1,11 +1,13 @@
 using Application.Item;
 using Application.Orders;
+using Application.Supplier;
 using AutoMapper;
 using Domain;
 using FFsmartPlus.Services;
 using Infrastructure;
 using Infrastructure.Auth;
 using Microsoft.AspNetCore.Authorization;
+using Infrastructure.EmailSender;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,12 +20,14 @@ public class OrdersController : ControllerBase
     private readonly FridgeAppContext _context;
     private readonly IMapper _mapper;
     public readonly IStockService _StockService;
+    public readonly IEmailSender _EmailSender;
 
-    public OrdersController(FridgeAppContext context, IMapper mapper, IStockService stockService)
+    public OrdersController(FridgeAppContext context, IMapper mapper, IStockService stockService, IEmailSender emailSender)
     {
         _context = context;
         _StockService = stockService;
         _mapper = mapper;
+        _EmailSender = emailSender;
     }
     /// <summary>
     /// Get list of items below minimum stock level
@@ -97,6 +101,24 @@ public class OrdersController : ControllerBase
     [HttpPost("ConfirmOrder")]
     public async Task<ActionResult<bool>> ConfirmOrder(IEnumerable<SupplierOrderDto> orders)
     {
+        var ordersConverted = new List<OrderEmailRequest>();
+        foreach (var order in orders)
+        {
+            var ordersList = new List<OrderItem>();
+            foreach (var o in order.Orders)
+            {
+                ordersList.Add( new OrderItem(){Id = o.Id,Name = o.Name, OrderQuantity = o.OrderQuantity, UnitDesc = o.UnitDesc});
+            }
+            ordersConverted.Add( new OrderEmailRequest(){Email = order.Email, Address = order.Address, Orders = ordersList, Name = order.Name, supplierId = order.supplierId});
+        }
+        try
+        {
+            _EmailSender.SendOrderEmails(ordersConverted);
+        }
+        catch
+        {
+            return BadRequest();
+        }
         foreach (var supplier in orders)
         {
             foreach (var order in supplier.Orders)
@@ -123,22 +145,89 @@ public class OrdersController : ControllerBase
     [HttpPost("ConfirmOrderByIDs")]
     public async Task<ActionResult<bool>> ConfirmOrderByIDs(OrderRequestDto orderRequest)
     {
+        var ordersConverted = new List<OrderEmailRequest>();
         foreach (var order in orderRequest.Items)
+        {
+            try
             {
-                _context.OrderLogs.Add(new OrderLog()
+                CheckForDuplicateIds(orderRequest);
+            }
+            catch
+            {
+                return BadRequest("Duplicate IDs");
+            }
+            var item = await _context.Items.FindAsync(order.Id);
+            if (item is null)
+            {
+                return BadRequest("Item not found");
+            }
+
+            var supplierOrder = ordersConverted.FirstOrDefault(x => x.supplierId == item.SupplierId);
+            await _context.Entry(item).Reference(i => i.Supplier).LoadAsync();
+            if (supplierOrder is null)
+            {
+                var neworder = new OrderEmailRequest()
+                {
+                    Address = item.Supplier.Address, 
+                    Email = item.Supplier.Email, 
+                    Name = item.Supplier.Name,
+                    supplierId = item.SupplierId,
+                    Orders = new List<OrderItem>
+                    {
+                        new OrderItem()
+                        {
+                            Id = item.Id,
+                            OrderQuantity = order.quantity,
+                            Name = item.Name,
+                            UnitDesc = item.UnitDesc
+                        }
+                    }
+                };
+                ordersConverted.Add(neworder);
+            }
+            else
+            {
+                supplierOrder.Orders.Add(new OrderItem()
+                {
+                    Id = item.Id,
+                    OrderQuantity = order.quantity,
+                    Name = item.Name,
+                    UnitDesc = item.UnitDesc
+                });
+            }
+            try
+            {
+                _EmailSender.SendOrderEmails(ordersConverted);
+            }
+            catch
+            {
+                return BadRequest();
+            }
+
+            _context.OrderLogs.Add(new OrderLog()
                 {
                     ItemId = order.Id,
-                    //SupplierId = supplier.Id,
+                    SupplierId = item.SupplierId,
                     orderDate = DateTime.Now,
                     OrderDelivered = false,
                     Quantity = order.quantity
                 });
                 await _context.SaveChangesAsync();
-            }
+        }
 
         return true;
     }
-
+    private void CheckForDuplicateIds(OrderRequestDto list)
+    {
+        var ids = new HashSet<long>();
+        foreach (var obj in list.Items)
+        {
+            if (!ids.Add(obj.Id))
+            {
+                throw new Exception($"Duplicate ID found: {obj.Id}");
+            }
+        }
+    }
    
 
     private async Task<double> GetCurrentStock(Item item)

@@ -76,6 +76,8 @@ namespace FFsmartPlus.Controllers
         [ProducesResponseType(typeof(ValidationResult), 400)]
         public async Task<IActionResult> PutSupplier(long id, SupplierDto supplierDto)
         {
+            if (id != supplierDto.Id)
+                return BadRequest("Id does not match body");
             if (!SupplierExists(id))
             {
                 return NotFound();

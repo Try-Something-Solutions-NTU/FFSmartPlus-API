@@ -31,8 +31,8 @@ namespace Infrastructure
         public DbSet<OrderLog> OrderLogs { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Server=JPC\SQLEXPRESS;Database=AAD1;User=user1;Password=@Password1;Trust Server Certificate=True");
-            //optionsBuilder.UseSqlServer(@"Server=localhost;Database=FF3;User=sa;Password=@AdminPassWord123;Trust Server Certificate=True");
+            //optionsBuilder.UseSqlServer(@"Server=JPC\SQLEXPRESS;Database=AAD1;User=user1;Password=@Password1;Trust Server Certificate=True");
+            optionsBuilder.UseSqlServer(@"Server=localhost;Database=FF3;User=sa;Password=@AdminPassWord123;Trust Server Certificate=True");
             if (_log)
             {
                 optionsBuilder
