@@ -17,6 +17,9 @@ namespace Infrastructure
         public FridgeAppContext()
         {
         }
+        public FridgeAppContext(DbContextOptions options) : base(options)
+        {
+        }
 
         public FridgeAppContext(bool log)
         {
@@ -31,13 +34,17 @@ namespace Infrastructure
         public DbSet<OrderLog> OrderLogs { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //optionsBuilder.UseSqlServer(@"Server=JPC\SQLEXPRESS;Database=AAD1;User=user1;Password=@Password1;Trust Server Certificate=True");
-            optionsBuilder.UseSqlServer(@"Server=localhost;Database=FF3;User=sa;Password=@AdminPassWord123;Trust Server Certificate=True");
-            if (_log)
+            if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder
-                    .EnableSensitiveDataLogging()
-                    .LogTo(Console.WriteLine, new[] { RelationalEventId.CommandExecuted });
+                //optionsBuilder.UseSqlServer(@"Server=JPC\SQLEXPRESS;Database=AAD1;User=user1;Password=@Password1;Trust Server Certificate=True");
+                optionsBuilder.UseSqlServer(
+                    @"Server=localhost;Database=FF3;User=sa;Password=@AdminPassWord123;Trust Server Certificate=True");
+                if (_log)
+                {
+                    optionsBuilder
+                        .EnableSensitiveDataLogging()
+                        .LogTo(Console.WriteLine, new[] { RelationalEventId.CommandExecuted });
+                }
             }
         }
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

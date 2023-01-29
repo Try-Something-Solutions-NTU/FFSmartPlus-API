@@ -6,13 +6,18 @@ namespace Infrastructure.EmailSender;
 
 public class EmailSender : IEmailSender
 {
-    private HttpClient _httpClient = new HttpClient();
+    private readonly HttpClient _httpClient = new HttpClient();
     public async Task<bool> SendOrderEmails(IEnumerable<OrderEmailRequest> orders)
     {
         var url =
             "https://prod-09.uksouth.logic.azure.com:443/workflows/1b83110a720d486a86ae31e943a18e88/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=spDgcdN50E4sHH8gWQ8fy1qcEUxbKxDqSMLSAIzIDJg";
+        if (orders is null)
+            return false;
         foreach (var order in orders)
         {
+            if (!IsValid(order))
+                return false;
+                
             var body = new EmailRequest()
                 { email = order.Email, SupplierName = order.Name, body = buildMessage(order) };
             var request = new HttpRequestMessage
@@ -50,5 +55,43 @@ public class EmailSender : IEmailSender
         
 
         return sb.ToString();
+    }
+    private bool IsValid(OrderEmailRequest request)
+    {
+        if (!IsValidEmail(request.Email))
+            return false;
+        if (string.IsNullOrEmpty(request.Name ?? "") || 
+            string.IsNullOrEmpty(request.Address ?? "") || 
+            string.IsNullOrEmpty(request.Email ?? ""))
+        {
+            return false;
+        }
+        else
+        {
+            foreach (var item in request.Orders)
+            {
+                if (string.IsNullOrEmpty(item.Name ?? "") || 
+                    string.IsNullOrEmpty(item.UnitDesc ?? ""))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+    private bool IsValidEmail(string email)
+    {
+        var trimmedEmail = email.Trim();
+
+        if (trimmedEmail.EndsWith(".")) {
+            return false; // suggested by @TK-421
+        }
+        try {
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == trimmedEmail;
+        }
+        catch {
+            return false;
+        }
     }
 }

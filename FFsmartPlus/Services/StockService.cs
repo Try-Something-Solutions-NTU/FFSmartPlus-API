@@ -19,13 +19,12 @@ public class StockService : IStockService
 
     public async Task<bool> RemoveStock(long id,double Quantity, string UserName)
     {
+        if (Quantity == 0)
+            return false;
         Domain.Item item = await _context.Items.FindAsync(id);
-             if (item is null)
-             {
-                 throw new Exception();
-
-             }
-             await _context.Entry(item).Collection(i => i.Units).LoadAsync();
+        if (item is null || UserName is null)
+            return false;
+        await _context.Entry(item).Collection(i => i.Units).LoadAsync();
              item.Units = item.Units.ToList();
               
              //if you try to remove too many items
@@ -83,10 +82,8 @@ public class StockService : IStockService
     public async Task<bool> AddStock(long id, NewUnitDto newUnits, string username)
     {
         Domain.Item item = await _context.Items.FindAsync(id);
-        if (item is null)
-        {
-            throw new Exception();
-        }
+        if (item is null || username is null || newUnits is null)
+            return false;
         await _context.Entry(item).Collection(i => i.Units).LoadAsync();
         Domain.Unit unit = item.Units.FirstOrDefault(x => x.ExpiryDate.Equals(newUnits.ExpiryDate));
         // try
