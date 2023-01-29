@@ -191,7 +191,7 @@ public class OrdersController : ControllerBase
             _context.OrderLogs.Add(new OrderLog()
                 {
                     ItemId = order.Id,
-                    //SupplierId = supplier.Id,
+                    SupplierId = item.SupplierId,
                     orderDate = DateTime.Now,
                     OrderDelivered = false,
                     Quantity = order.quantity
