@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing", "Testing\Testing.csproj", "{07ED59F8-255A-4A53-B874-E365E0FC7288}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{42C9D5DE-76EE-49C3-A29B-0733B6F5D342}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,8 @@ Global
 		{07ED59F8-255A-4A53-B874-E365E0FC7288}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{07ED59F8-255A-4A53-B874-E365E0FC7288}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{07ED59F8-255A-4A53-B874-E365E0FC7288}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{07ED59F8-255A-4A53-B874-E365E0FC7288} = {42C9D5DE-76EE-49C3-A29B-0733B6F5D342}
 	EndGlobalSection
 EndGlobal
