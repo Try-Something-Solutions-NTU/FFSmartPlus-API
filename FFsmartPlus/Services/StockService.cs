@@ -60,7 +60,7 @@ public class StockService : IStockService
                      {
                          EventDateTime = DateTime.Now,
                          Activity = Activity.removed,
-                         Quantity = unit.Quantity,
+                         Quantity = Quantity,
                          ExpiryDate = unit.ExpiryDate,
                          ItemId = id,
                          Item = item,

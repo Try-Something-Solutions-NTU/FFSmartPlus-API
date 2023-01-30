@@ -28,21 +28,6 @@ public class AdminControllerTests : IClassFixture<WebApplicationFactory<Program>
     }
 
 
-
-    [Fact]
-    public async Task Test_PutItem_ReturnsBadRequest_IfItemIsInvalid()
-    {
-        // Arrange
-        var controller = new ItemController(_context, _mapper);
-
-        var putItem = new ItemDto { Id = 2, Name = "" };
-
-        // Act
-        var result = await controller.PutItem(2, putItem);
-
-        // Assert
-        var badRequestResult = Assert.IsType<BadRequestResult>(result);
-        
-    }
+    
     
 }

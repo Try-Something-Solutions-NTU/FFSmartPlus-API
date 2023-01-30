@@ -38,8 +38,13 @@ public class AdminController : ControllerBase
     [HttpGet("Expiry")]
     public async Task<ActionResult<List<UnitListDto>>> GetExpiredItems()
     {
-        var expiredItems = ExpiredItems();
-        return _mapper.Map<List<UnitListDto>>(expiredItems);
+        var expiredItems = await ExpiredItems();
+        var list = new List<UnitListDto>();
+        foreach (var item in expiredItems)
+        {
+            list.Add(_mapper.Map<UnitListDto>(item));
+        }
+        return list;
     }
     /// <summary>
     /// Runs End of day operations

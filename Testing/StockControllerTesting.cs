@@ -49,7 +49,13 @@ public class StockControllerTesting : IClassFixture<WebApplicationFactory<Progra
         Assert.NotEmpty(units);
         Assert.Equal(units.Count, 1);
         Assert.Equal(units[0].Quantity, 2);
+        var audit = _context.AuditUnits.Where(x => x.Activity == Activity.Added && x.Quantity == 2 && x.ItemId == 1).ToList();
+        Assert.NotEmpty(audit);
+        Assert.Equal(audit[0].Quantity, 2);
+        Assert.Equal(audit[0].Id, 1);
+        Assert.Equal(audit[0].Activity, Activity.Added);
     }
+    
     [Fact]
     public async Task AddStockTwiceAddsToOneUnit()
     {
@@ -94,6 +100,31 @@ public class StockControllerTesting : IClassFixture<WebApplicationFactory<Progra
         Assert.True(resp);
         var units = _context.Units.Where(x => x.ItemId == 1).ToList();
         Assert.Equal(units.Count(), 0);
+        var audit = _context.AuditUnits.Where(x => x.Activity == Activity.removed && x.Quantity == 3 && x.ItemId == 1).ToList();
+        Assert.NotEmpty(audit);
+        Assert.Equal(audit[0].Quantity, 3);
+        Assert.Equal(audit[0].Id, 1);
+        Assert.Equal(audit[0].Activity, Activity.removed);
+    }
+    [Fact]
+    public async Task RemoveStockTwiceHas2Audit()
+    {
+        var resp = await _stockService.RemoveStock(1, 1, "Nick");
+        var resp2 = await _stockService.RemoveStock(1, 2, "Nick");
+
+        Assert.True(resp);
+        Assert.True(resp2);
+        var units = _context.Units.Where(x => x.ItemId == 1).ToList();
+        Assert.Equal(units.Count(), 0);
+        var audit = _context.AuditUnits.Where(x => x.Activity == Activity.removed && x.ItemId == 1).ToList();
+        Assert.NotEmpty(audit);
+        Assert.Equal(audit.Count(), 2);
+        Assert.Equal(audit[0].Quantity, 1);
+        Assert.Equal(audit[0].ItemId, 1);
+        Assert.Equal(audit[0].Activity, Activity.removed);
+        Assert.Equal(audit[1].Quantity, 2);
+        Assert.Equal(audit[1].ItemId, 1);
+        Assert.Equal(audit[1].Activity, Activity.removed);
     }
     [Fact]
     public async Task RemoveStockValidReturnsTrueCountCorrect()
