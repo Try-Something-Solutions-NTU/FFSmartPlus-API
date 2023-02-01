@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Application.Audit;
 using Application.Item;
 using Application.Unit;
 using AutoMapper;
@@ -77,27 +78,24 @@ public class AdminController : ControllerBase
     }
 
     [HttpGet("Audit")]
-    public async Task<ActionResult> AuditGeneration(int history)
+    public async Task<ActionResult<AuditDto>> AuditGeneration(int history)
     {
         var auditUnits = _context.AuditUnits
             .Include(au => au.Item)
             .OrderBy(au => au.EventDateTime)
             .Where(au => au.EventDateTime <= DateTime.Today.AddDays(-history))
             .ToList();
-
-        // Generate report
-        var report = new List<string>();
-        report.Add("ID, Quantity, Expiry Date, Item, Activity, Event Date, User");
-        foreach (var auditUnit in auditUnits)
+        var list = new List<AuditDto>();
+        foreach (var a in auditUnits)
         {
-            var row = $"{auditUnit.Id}, {auditUnit.Quantity}, {auditUnit.ExpiryDate.ToShortDateString()}, {auditUnit.Item.Name}, {auditUnit.Activity}, {auditUnit.EventDateTime.ToShortDateString()}, {auditUnit.UserName}";
-            report.Add(row);
+            list.Add(_mapper.Map<AuditDto>(a));
         }
-        return Ok(report);
-        // returns as a CSV, Setup for download?
+        // Generate report
+        return Ok(list);
+
     }
     [HttpGet("Audit/{id}")]
-    public async Task<ActionResult> AuditGeneration(long id, int history)
+    public async Task<ActionResult<AuditDto>> AuditGeneration(long id, int history)
     {
         if (await _context.Items.FindAsync(id) is null)
         {
@@ -108,19 +106,13 @@ public class AdminController : ControllerBase
             .OrderBy(au => au.EventDateTime)
             .Where(au => au.Item.Id.Equals(id) && au.EventDateTime <= DateTime.Today.AddDays(-history))
             .ToList();
-
-        // Generate report
-        var report = new List<string>();
-        report.Add("ID, Quantity, Expiry Date, Item, Activity, Event Date, User");
-        foreach (var auditUnit in auditUnits)
+        var list = new List<AuditDto>();
+        foreach (var a in auditUnits)
         {
-            var row = $"{auditUnit.Id}, {auditUnit.Quantity}, {auditUnit.ExpiryDate.ToShortDateString()}, {auditUnit.Item.Name}, {auditUnit.Activity}, {auditUnit.EventDateTime.ToShortDateString()}, {auditUnit.UserName}";
-            report.Add(row);
+            list.Add(_mapper.Map<AuditDto>(a));
         }
-
-        return Ok(report);
-        // Do something with the report
-    
+        // Generate report
+        return Ok(list);
     }
 
     private async Task<List<Unit>> ExpiredItems()

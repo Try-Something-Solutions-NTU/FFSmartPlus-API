@@ -1,3 +1,4 @@
+using Application.Audit;
 using Application.Fridge;
 using Application.Item;
 using Application.Orders;
@@ -28,6 +29,7 @@ public class AutoMapperProfile : Profile
         CreateMap<OrderLog, OrderDto>();
         CreateMap<OrderDto, OrderLog>();
         CreateMap<Unit,UnitListDto>();
+        CreateMap<AuditUnit, AuditDto>();
         CreateMap<IEnumerable<SupplierOrderDto>, IEnumerable<OrderEmailRequest>>();
         // Use CreateMap... Etc.. here (Profile methods are the same as configuration methods)
     }
