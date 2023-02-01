@@ -61,6 +61,10 @@ public class DeliveryController : ControllerBase
         //TODO change to use User.Identity.Name and error handleing 
         var username = "Nick";
         OrderLog order = await _context.OrderLogs.FindAsync(confirmationDto.OrderLogId);
+        if (order is null)
+        {
+            return NotFound("Order log not found");
+        }
         await _stockService.AddStock((long)order.ItemId, confirmationDto.unitDeliver, username);
         order.actualDelivered = confirmationDto.unitDeliver.Quantity;
         order.DeliverDate = DateTime.Now;
