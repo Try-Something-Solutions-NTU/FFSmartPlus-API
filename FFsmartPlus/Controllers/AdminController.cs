@@ -82,7 +82,7 @@ public class AdminController : ControllerBase
         var auditUnits = _context.AuditUnits
             .Include(au => au.Item)
             .OrderBy(au => au.EventDateTime)
-            .Where(au => au.ExpiryDate <= DateTime.Today.AddDays(-history))
+            .Where(au => au.EventDateTime <= DateTime.Today.AddDays(-history))
             .ToList();
 
         // Generate report
@@ -106,7 +106,7 @@ public class AdminController : ControllerBase
         var auditUnits = _context.AuditUnits
             .Include(au => au.Item)
             .OrderBy(au => au.EventDateTime)
-            .Where(au => au.Item.Id.Equals(id) && au.ExpiryDate <= DateTime.Today.AddDays(-history))
+            .Where(au => au.Item.Id.Equals(id) && au.EventDateTime <= DateTime.Today.AddDays(-history))
             .ToList();
 
         // Generate report
