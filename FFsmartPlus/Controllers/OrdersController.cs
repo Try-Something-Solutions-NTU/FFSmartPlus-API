@@ -104,10 +104,22 @@ public class OrdersController : ControllerBase
         var ordersConverted = new List<OrderEmailRequest>();
         foreach (var order in orders)
         {
+            
             var ordersList = new List<OrderItem>();
             foreach (var o in order.Orders)
             {
+                var item = await _context.Items.FindAsync(o.Id);
+                if (item is null)
+                {
+                    return BadRequest("Item not found " + o.Id);
+                }
                 ordersList.Add( new OrderItem(){Id = o.Id,Name = o.Name, OrderQuantity = o.OrderQuantity, UnitDesc = o.UnitDesc});
+                
+            }
+            var supplier = await _context.Suppliers.FindAsync(order.supplierId);
+            if (supplier is null)
+            {
+                return BadRequest("Supplier not found " + order.supplierId);
             }
             ordersConverted.Add( new OrderEmailRequest(){Email = order.Email, Address = order.Address, Orders = ordersList, Name = order.Name, supplierId = order.supplierId});
         }
