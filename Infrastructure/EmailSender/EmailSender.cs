@@ -41,6 +41,8 @@ public class EmailSender : IEmailSender
             sb.AppendLine($"Supplier Name: {order.Name}<br>");
             sb.AppendLine($"Supplier Address: {order.Address}<br>");
             sb.AppendLine($"Supplier Email: {order.Email}<br>");
+            sb.AppendLine($"OTP: {order.DoorCode}<br>");
+
             sb.AppendLine("Order Details:<br>");
             sb.AppendLine("----------------<br>");
             foreach (var item in order.Orders)
@@ -62,7 +64,8 @@ public class EmailSender : IEmailSender
             return false;
         if (string.IsNullOrEmpty(request.Name ?? "") || 
             string.IsNullOrEmpty(request.Address ?? "") || 
-            string.IsNullOrEmpty(request.Email ?? ""))
+            string.IsNullOrEmpty(request.Email ?? "")
+            )
         {
             return false;
         }

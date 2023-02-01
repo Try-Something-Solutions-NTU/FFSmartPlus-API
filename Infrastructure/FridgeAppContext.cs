@@ -26,11 +26,12 @@ namespace Infrastructure
             _log = log;
         }
         
-
+        public DbSet<DoorCode> DoorCodes { get; set; }
         public DbSet<Item> Items { get; set; }
         public DbSet<Unit> Units { get; set; }
         public DbSet<AuditUnit> AuditUnits { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
+        public DbSet<AuditDoor> AuditDoors { get; set; }
         public DbSet<OrderLog> OrderLogs { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

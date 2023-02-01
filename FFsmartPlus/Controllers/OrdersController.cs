@@ -19,11 +19,13 @@ public class OrdersController : ControllerBase
 {
     private readonly FridgeAppContext _context;
     private readonly IMapper _mapper;
-    public readonly IStockService _StockService;
-    public readonly IEmailSender _EmailSender;
+    private readonly IStockService _StockService;
+    private readonly IEmailSender _EmailSender;
+    private readonly IDoorService _doorService;
 
-    public OrdersController(FridgeAppContext context, IMapper mapper, IStockService stockService, IEmailSender emailSender)
+    public OrdersController(FridgeAppContext context, IMapper mapper, IStockService stockService, IEmailSender emailSender, IDoorService doorService)
     {
+        _doorService = doorService;
         _context = context;
         _StockService = stockService;
         _mapper = mapper;
@@ -121,7 +123,7 @@ public class OrdersController : ControllerBase
             {
                 return BadRequest("Supplier not found " + order.supplierId);
             }
-            ordersConverted.Add( new OrderEmailRequest(){Email = order.Email, Address = order.Address, Orders = ordersList, Name = order.Name, supplierId = order.supplierId});
+            ordersConverted.Add( new OrderEmailRequest(){Email = order.Email, Address = order.Address, Orders = ordersList, Name = order.Name, supplierId = order.supplierId, DoorCode = await _doorService.GenerateNewCode(order.supplierId) });
         }
         try
         {
@@ -184,6 +186,7 @@ public class OrdersController : ControllerBase
                     Email = item.Supplier.Email, 
                     Name = item.Supplier.Name,
                     supplierId = item.SupplierId,
+                    DoorCode = await _doorService.GenerateNewCode(item.SupplierId),
                     Orders = new List<OrderItem>
                     {
                         new OrderItem()
