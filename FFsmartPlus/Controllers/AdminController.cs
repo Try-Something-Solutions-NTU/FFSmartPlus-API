@@ -78,7 +78,7 @@ public class AdminController : ControllerBase
     }
 
     [HttpGet("Audit")]
-    public async Task<ActionResult<AuditDto>> AuditGeneration(int history)
+    public async Task<ActionResult<List<AuditDto>>> AuditGeneration(int history)
     {
         var auditUnits = _context.AuditUnits
             .Include(au => au.Item)
@@ -95,7 +95,7 @@ public class AdminController : ControllerBase
 
     }
     [HttpGet("Audit/{id}")]
-    public async Task<ActionResult<AuditDto>> AuditGeneration(long id, int history)
+    public async Task<ActionResult<List<AuditDto>>> AuditGeneration(long id, int history)
     {
         if (await _context.Items.FindAsync(id) is null)
         {
