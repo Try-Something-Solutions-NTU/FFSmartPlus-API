@@ -76,7 +76,7 @@ public class AdminController : ControllerBase
         _context.SaveChangesAsync();
         return NoContent();
     }
-
+    [Authorize(Roles = UserRoles.HeadChef)]
     [HttpGet("Audit")]
     public async Task<ActionResult<List<AuditDto>>> AuditGeneration(int history)
     {
@@ -93,6 +93,7 @@ public class AdminController : ControllerBase
         return Ok(list);
 
     }
+    [Authorize(Roles = UserRoles.HeadChef)]
     [HttpGet("Audit/{id}")]
     public async Task<ActionResult<List<AuditDto>>> AuditGeneration(long id, int history)
     {
@@ -113,9 +114,17 @@ public class AdminController : ControllerBase
         // Generate report
         return Ok(list);
     }
+    [Authorize(Roles = UserRoles.HeadChef)] 
+    [HttpGet("ExpiredNames")]
+    public async Task<ActionResult<List<string>>> GetExpiredItemsNames()
+    {
+        var list = _context.Units.Where(x => x.ExpiryDate <= DateTime.Today).Select(x => x.Item.Name).ToList();
+        return list;
+    }
 
     private async Task<List<Unit>> ExpiredItems()
     {
        return _context.Units.Where(x => x.ExpiryDate <= DateTime.Today).ToList();
     }
+    
 }
