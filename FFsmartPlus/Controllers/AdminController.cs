@@ -119,12 +119,16 @@ public class AdminController : ControllerBase
     public async Task<ActionResult<List<string>>> GetExpiredItemsNames()
     {
         var list = _context.Units.Where(x => x.ExpiryDate <= DateTime.Today).Select(x => x.Item.Name).ToList();
-        return list;
+        if (list is null)
+        {
+            return NotFound();
+        }
+        return Ok(list);
     }
 
     private async Task<List<Unit>> ExpiredItems()
-    {
-       return _context.Units.Where(x => x.ExpiryDate <= DateTime.Today).ToList();
+    { 
+        return _context.Units.Where(x => x.ExpiryDate <= DateTime.Today).ToList();
     }
     
 }
