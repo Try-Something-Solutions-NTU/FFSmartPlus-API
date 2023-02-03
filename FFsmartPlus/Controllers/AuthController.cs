@@ -42,10 +42,20 @@ namespace FFsmartPlus.Controllers
         /// <summary>
         ///  Gets all users
         /// </summary>
+        [Authorize]
         [HttpGet("all")]
         public async Task<ActionResult<List<string>>> GetUsers()
         {
             return await _context.Users.Select(x => x.UserName).ToListAsync();
+        }
+        /// <summary>
+        /// Gets all roles
+        /// </summary>
+        [HttpGet("roles")]
+        public async Task<ActionResult<List<string>>> GetAllRoles()
+        {
+            var list = new List<string>(){UserRoles.Admin,UserRoles.HeadChef,UserRoles.Chef,UserRoles.Delivery};
+            return list;
         }
         /// <summary>
         /// User Login 

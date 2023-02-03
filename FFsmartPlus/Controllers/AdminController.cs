@@ -90,7 +90,6 @@ public class AdminController : ControllerBase
         {
             list.Add(_mapper.Map<AuditDto>(a));
         }
-        // Generate report
         return Ok(list);
 
     }

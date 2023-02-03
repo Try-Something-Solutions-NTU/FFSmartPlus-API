@@ -38,7 +38,6 @@ public class DoorService : IDoorService
         {
             return false;
         }
-
         _context.DoorCodes.Remove(codeRecord);
         await LogEvent(codeRecord.SupplierId);
         await _context.SaveChangesAsync();
@@ -65,7 +64,7 @@ public class DoorService : IDoorService
     }
     private long GenerateRandomNo()
     {
-        int _min = 0001;
+        int _min = 1000;
         int _max = 9999;
         Random _rdm = new Random();
         return _rdm.Next(_min, _max);
