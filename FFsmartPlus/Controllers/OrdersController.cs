@@ -52,6 +52,23 @@ public class OrdersController : ControllerBase
 
         return list;
     }
+    [Authorize(Roles = UserRoles.Admin)]
+    [Authorize(Roles = UserRoles.HeadChef)]
+    [HttpGet("BelowMin30percent")]
+    public async Task<ActionResult<IEnumerable<CurrentStockDto>>> GetItemsBelowMinStock30percent()
+    {
+        var lowStockItems = await  GetItemBelowMinimumStock30percent();
+        var list = new List<CurrentStockDto>();
+        foreach (var item in lowStockItems)
+        {
+            await _context.Entry(item).Collection(i => i.Units).LoadAsync();
+            var currentStock = item.Units.Select(x => x.Quantity).Sum();
+            var itemDto = _mapper.Map<ItemDto>(item);
+            list.Add(new CurrentStockDto(){item = itemDto, currentQuantity = currentStock});
+        }
+
+        return list;
+    }
     /// <summary>
     /// Generates an order of items below the minimum stock level
     /// </summary>
@@ -266,6 +283,22 @@ public class OrdersController : ControllerBase
                 lowStockItems.Add(item);
             }
             
+        }
+        return lowStockItems;
+    }
+    private async Task<List<Item>> GetItemBelowMinimumStock30percent()
+    {
+        var items = await _context.Items.Where(x => x.Active.Equals(true)).Include(i => i.Supplier).ToListAsync();
+        var lowStockItems = new List<Item>();
+        foreach (var item in items)
+        {
+            await _context.Entry(item).Collection(i => i.Units).LoadAsync();
+            var currentStock = item.Units.Select(x => x.Quantity).Sum();
+            var stockThreshold = item.minimumStock * 1.3;
+            if (currentStock <= stockThreshold)
+            {
+                lowStockItems.Add(item);
+            }
         }
         return lowStockItems;
     }
