@@ -26,7 +26,7 @@ public class EmailSender : IEmailSender
                 RequestUri = new Uri(url),
                 Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
             };
-
+            // Comment out to stop from sending emails
             var response = await _httpClient.SendAsync(request); 
         }
 

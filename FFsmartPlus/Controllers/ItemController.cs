@@ -184,6 +184,7 @@ namespace FFsmartPlus.Controllers
               Name = newItem.Name,
               UnitDesc = newItem.UnitDesc,
               minimumStock = newItem.minimumStock,
+              desiredStock = newItem.desiredStock,
               SupplierId = newItem.SupplierId
           };
           var validatorResult = await _itemValidator.ValidateAsync(item);
