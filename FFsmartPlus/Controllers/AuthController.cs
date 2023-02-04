@@ -58,6 +58,24 @@ namespace FFsmartPlus.Controllers
             return list;
         }
         /// <summary>
+        /// 
+        /// </summary>
+        [HttpGet("{username}/roles")]
+        public async Task<ActionResult<List<string>>> GetRolesByUserName(string username)
+        {
+            var user = await _userManager.FindByNameAsync(username);
+            if (user is null)
+            {
+                return NotFound("User not found");
+            }
+            var claims = await _userManager.GetRolesAsync(user);
+            if (claims is null)
+            {
+                claims = new List<string>();
+            }
+            return Ok(claims.ToList());
+        }
+        /// <summary>
         /// User Login 
         /// </summary>
         [HttpPost]
