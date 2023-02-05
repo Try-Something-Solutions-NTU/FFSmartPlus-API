@@ -54,6 +54,31 @@ public class EmailSenderTests
     }
 
     [Fact]
+    public async Task SendEmailReturnsFalse_InvalidEmail()
+    {
+        var result = await _emailSender.SendEmail("Context", "invalidemail@@@ddd.c", "Test");
+        Assert.False(result);
+    }
+    [Fact]
+    public async Task SendEmailReturnsFalse_NullContext()
+    {
+        var result = await _emailSender.SendEmail(null, "test@test.com", "Test");
+        Assert.False(result);
+    }
+    [Fact]
+    public async Task SendEmailReturnsFalse_NullName()
+    {
+        var result = await _emailSender.SendEmail("Context", "test@test.com", null);
+        Assert.False(result);
+    }
+    [Fact]
+    public async Task SendEmailReturnsTrue_ValidRequest()
+    {
+        var result = await _emailSender.SendEmail("Context", "test@test.com", "Test me");
+        Assert.False(result);
+    }
+
+    [Fact]
     
     public async Task SendOrderReturnsTrueIfValidRequest()
     {

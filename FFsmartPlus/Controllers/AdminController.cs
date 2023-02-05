@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using Application.Audit;
 using Application.Item;
@@ -11,6 +12,7 @@ using AutoMapper;
 using Domain;
 using Infrastructure;
 using Infrastructure.Auth;
+using Infrastructure.EmailSender;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -24,10 +26,12 @@ public class AdminController : ControllerBase
 {
     private readonly FridgeAppContext _context;
     private readonly IMapper _mapper;
-    public AdminController(FridgeAppContext context, IMapper mapper)
+    private readonly IEmailSender _emailSender;
+    public AdminController(FridgeAppContext context, IMapper mapper, IEmailSender emailSender)
     {
         _context = context;
         _mapper = mapper;
+        _emailSender = emailSender;
     }
     /// <summary>
     /// Get Expired Items
@@ -35,11 +39,27 @@ public class AdminController : ControllerBase
     [Authorize(Roles = UserRoles.Chef)]
     [Authorize(Roles = UserRoles.Admin)]
     [Authorize(Roles = UserRoles.HeadChef)]
-
     [HttpGet("Expiry")]
     public async Task<ActionResult<List<UnitListDto>>> GetExpiredItems()
     {
         var expiredItems = await ExpiredItems();
+        var list = new List<UnitListDto>();
+        foreach (var item in expiredItems)
+        {
+            list.Add(_mapper.Map<UnitListDto>(item));
+        }
+        return list;
+    }
+    /// <summary>
+    /// Get Expired Items
+    /// </summary>
+    [Authorize(Roles = UserRoles.Chef)]
+    [Authorize(Roles = UserRoles.Admin)]
+    [Authorize(Roles = UserRoles.HeadChef)]
+    [HttpGet("ExpiryByDays")]
+    public async Task<ActionResult<List<UnitListDto>>> GetExpiredItems(int days)
+    {
+        var expiredItems = await ExpiredItems(days);
         var list = new List<UnitListDto>();
         foreach (var item in expiredItems)
         {
@@ -78,7 +98,7 @@ public class AdminController : ControllerBase
     }
     [Authorize(Roles = UserRoles.HeadChef)]
     [HttpGet("Audit")]
-    public async Task<ActionResult<List<AuditDto>>> AuditGeneration(int history)
+    public async Task<ActionResult<List<AuditDto>>> AuditGeneration(int history, string? email)
     {
         var auditUnits = _context.AuditUnits
             .Include(au => au.Item)
@@ -90,6 +110,13 @@ public class AdminController : ControllerBase
         {
             list.Add(_mapper.Map<AuditDto>(a));
         }
+        if (email is not null && list.Count != 0)
+        {
+            var data = GenerateEmail(list);
+            var result = await _emailSender.SendEmail(data, email, "Audit");
+            if (!result)
+                return Problem("Error sending email");
+        }
         return Ok(list);
 
     }
@@ -98,9 +125,7 @@ public class AdminController : ControllerBase
     public async Task<ActionResult<List<AuditDto>>> AuditGeneration(long id, int history)
     {
         if (await _context.Items.FindAsync(id) is null)
-        {
             return NotFound();
-        }
         var auditUnits = _context.AuditUnits
             .Include(au => au.Item)
             .OrderBy(au => au.EventDateTime)
@@ -111,6 +136,7 @@ public class AdminController : ControllerBase
         {
             list.Add(_mapper.Map<AuditDto>(a));
         }
+        
         // Generate report
         return Ok(list);
     }
@@ -130,5 +156,21 @@ public class AdminController : ControllerBase
     { 
         return _context.Units.Where(x => x.ExpiryDate <= DateTime.Today).ToList();
     }
-    
+    private async Task<List<Unit>> ExpiredItems(int days)
+    { 
+        return _context.Units.Where(x => x.ExpiryDate <= DateTime.Today.AddDays(days)).ToList();
+    }
+
+    private string GenerateEmail(List<AuditDto> auditDtos)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine("Audit Log: <br>");
+        sb.AppendLine("Expiry,EventTime,Quantity,ItemID,Username<br>");
+        foreach (var a in auditDtos)
+        {
+            sb.AppendLine($"{a.ExpiryDate},{a.EventDateTime},{a.Quantity},{a.ItemId},{a.UserName}<br>");
+        }
+
+        return sb.ToString();
+    }
 }

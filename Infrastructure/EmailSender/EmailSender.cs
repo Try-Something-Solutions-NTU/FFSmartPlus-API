@@ -6,12 +6,13 @@ namespace Infrastructure.EmailSender;
 
 public class EmailSender : IEmailSender
 {
+    private  readonly  string url =  
+    "https://prod-09.uksouth.logic.azure.com:443/workflows/1b83110a720d486a86ae31e943a18e88/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=spDgcdN50E4sHH8gWQ8fy1qcEUxbKxDqSMLSAIzIDJg";
+
     private readonly HttpClient _httpClient = new HttpClient();
     public async Task<bool> SendOrderEmails(IEnumerable<OrderEmailRequest> orders)
     {
-        var url =
-            "https://prod-09.uksouth.logic.azure.com:443/workflows/1b83110a720d486a86ae31e943a18e88/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=spDgcdN50E4sHH8gWQ8fy1qcEUxbKxDqSMLSAIzIDJg";
-        if (orders is null)
+               if (orders is null)
             return false;
         foreach (var order in orders)
         {
@@ -32,6 +33,26 @@ public class EmailSender : IEmailSender
 
         return true;
     }
+
+    public async Task<bool> SendEmail(string content, string email, string name)
+    {
+        if (!IsValidEmail(email))
+            return false;
+        if (content is null || email is null || name is null)
+            return false;
+        var body = new EmailRequest()
+            { email = email, SupplierName = name, body = content };
+        var request = new HttpRequestMessage
+        {
+            Method = HttpMethod.Post,
+            RequestUri = new Uri(url),
+            Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
+        };
+
+        var response = await _httpClient.SendAsync(request);
+        return true;
+    }
+    
 
     private string buildMessage(OrderEmailRequest order)
     {
@@ -58,6 +79,7 @@ public class EmailSender : IEmailSender
 
         return sb.ToString();
     }
+    
     private bool IsValid(OrderEmailRequest request)
     {
         if (!IsValidEmail(request.Email))
