@@ -24,7 +24,7 @@ public class DoorsTesting : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task invalidSupplierIDReturnsexception()
+    public async Task invalidSupplierIDReturnsException()
     {
         Func<Task> act = () => _doorService.GenerateNewCode(0);
         //Assert

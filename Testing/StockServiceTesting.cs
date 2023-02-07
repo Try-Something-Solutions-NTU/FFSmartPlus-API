@@ -9,13 +9,13 @@ using Moq;
 
 namespace Testing;
 
-public class StockControllerTesting : IClassFixture<WebApplicationFactory<Program>>
+public class StockServiceTesting : IClassFixture<WebApplicationFactory<Program>>
 {
     private StockService _stockService;
     private readonly IMapper _mapper;
     private FridgeAppContext _context;
 
-    public StockControllerTesting(WebApplicationFactory<Program> factory)
+    public StockServiceTesting(WebApplicationFactory<Program> factory)
     {
         _mapper = factory.Services.GetService<IMapper>();
          _context = GetDatabaseContext().Result;

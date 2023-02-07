@@ -75,7 +75,7 @@ public class EmailSenderTests
     public async Task SendEmailReturnsTrue_ValidRequest()
     {
         var result = await _emailSender.SendEmail("Context", "test@test.com", "Test me");
-        Assert.False(result);
+        Assert.True(result);
     }
 
     [Fact]

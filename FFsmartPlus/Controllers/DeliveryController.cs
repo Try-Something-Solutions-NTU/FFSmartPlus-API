@@ -75,6 +75,7 @@ public class DeliveryController : ControllerBase
     }
 
     [HttpGet("/OrdersByDate/{date}")]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrdersByDate(DateTime date)
     {
         var orderLogs = _context.OrderLogs.Where(x => x.orderDate.Date.DayOfYear == date.Date.DayOfYear  ).Include(x => x.Item).ToList();
