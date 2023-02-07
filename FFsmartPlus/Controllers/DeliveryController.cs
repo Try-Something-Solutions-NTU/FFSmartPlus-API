@@ -58,8 +58,9 @@ public class DeliveryController : ControllerBase
     [Authorize(Roles = UserRoles.HeadChef)]
     public async Task<ActionResult<bool>> ConfirmDeliver(OrderConfirmationDTO confirmationDto)
     {
-        //TODO change to use User.Identity.Name and error handleing 
-        var username = "Nick";
+        if (User is null)
+            return NotFound();
+        var username = User.Identity.Name;
         OrderLog order = await _context.OrderLogs.FindAsync(confirmationDto.OrderLogId);
         if (order is null)
         {
