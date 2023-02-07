@@ -29,7 +29,8 @@ public class DeliveryController : ControllerBase
     }
 
     [HttpGet("{id}/{date}")]
-    [Authorize]
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef},{UserRoles.Delivery}")]
+
     public async Task<ActionResult<ActiveOrdersDto>> GetActiveOrders(long id, DateTime date)
     {
         var orderLogs = _context.OrderLogs.Where(x => x.SupplierId == id && x.OrderDelivered ==false && x.orderDate.Date.DayOfYear == date.Date.DayOfYear && x.orderDate.Date.Year == date.Date.Year).Include(x => x.Item).ToList();
@@ -53,9 +54,7 @@ public class DeliveryController : ControllerBase
     /// </summary>
 
     [HttpPut("Confirm")]
-    [Authorize(Roles = UserRoles.Delivery)]
-    [Authorize(Roles = UserRoles.Admin)]
-    [Authorize(Roles = UserRoles.HeadChef)]
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef},{UserRoles.Delivery}")]
     public async Task<ActionResult<bool>> ConfirmDeliver(OrderConfirmationDTO confirmationDto)
     {
         if (User is null)
@@ -76,7 +75,7 @@ public class DeliveryController : ControllerBase
     }
 
     [HttpGet("/OrdersByDate/{date}")]
-    [Authorize]
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef},{UserRoles.Delivery}")]
     public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrdersByDate(DateTime date)
     {
         var orderLogs = _context.OrderLogs.Where(x => x.orderDate.Date.DayOfYear == date.Date.DayOfYear  ).Include(x => x.Item).ToList();

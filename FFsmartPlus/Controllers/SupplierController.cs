@@ -16,8 +16,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace FFsmartPlus.Controllers
 {
     [Route("api/Suppliers/[controller]")]
-    [Authorize(Roles = UserRoles.Admin)]
-    [Authorize(Roles = UserRoles.HeadChef)]
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef}")]
     [ApiController]
     public class SupplierController : ControllerBase
     {
@@ -117,6 +116,7 @@ namespace FFsmartPlus.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(SupplierDto), 201)]
         [ProducesResponseType(typeof(ValidationResult), 400)]
+
         public async Task<ActionResult<SupplierDto>> PostSupplier(NewSupplierDto supplier)
         {
           if (_context.Suppliers == null)

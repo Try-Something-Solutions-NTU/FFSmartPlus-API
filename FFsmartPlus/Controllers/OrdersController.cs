@@ -35,8 +35,7 @@ public class OrdersController : ControllerBase
     /// Get list of items below minimum stock level
     /// </summary>
     //Get: api/Orders/BelowMin
-    [Authorize(Roles = UserRoles.Admin)]
-    [Authorize(Roles = UserRoles.HeadChef)]
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef}")]
     [HttpGet("BelowMin")]
     public async Task<ActionResult<IEnumerable<CurrentStockDto>>> GetItemsBelowMinStock()
     {
@@ -52,8 +51,7 @@ public class OrdersController : ControllerBase
 
         return list;
     }
-    [Authorize(Roles = UserRoles.Admin)]
-    [Authorize(Roles = UserRoles.HeadChef)]
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef}")]
     [HttpGet("BelowMin30percent")]
     public async Task<ActionResult<IEnumerable<CurrentStockDto>>> GetItemsBelowMinStock30percent()
     {
@@ -72,8 +70,7 @@ public class OrdersController : ControllerBase
     /// <summary>
     /// Generates an order of items below the minimum stock level
     /// </summary>
-    [Authorize(Roles = UserRoles.Admin)]
-    [Authorize(Roles = UserRoles.HeadChef)]
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef}")]
     [HttpGet("BelowMin/GenerateOrder")]
     public async Task<ActionResult<IEnumerable<SupplierOrderDto>>> GetMinimumOrder()
     {
@@ -115,8 +112,7 @@ public class OrdersController : ControllerBase
     /// Registers and sends the order to suppliers 
     /// </summary>
 
-    [Authorize(Roles = UserRoles.Admin)]
-    [Authorize(Roles = UserRoles.HeadChef)]
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef},{UserRoles.Delivery}")]
     [HttpPost("ConfirmOrder")]
     public async Task<ActionResult<bool>> ConfirmOrder(IEnumerable<SupplierOrderDto> orders)
     {

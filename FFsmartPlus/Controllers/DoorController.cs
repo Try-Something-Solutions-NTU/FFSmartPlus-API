@@ -24,7 +24,7 @@ public class DoorController : ControllerBase
 /// </summary>
 
     [HttpGet("GenerateCode/{id}")]
-    [Authorize(Roles = UserRoles.Admin)]
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef},{UserRoles.Delivery}")]
     public async Task<ActionResult<long>> GenerateCode(long id)
 {
     var supplier = await _context.Suppliers.FindAsync(id);
@@ -35,7 +35,7 @@ public class DoorController : ControllerBase
     var code = await _doorService.GenerateNewCode(id);
     return Ok(code);
 }
-
+[Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef},{UserRoles.Delivery}")]
 [HttpGet("Open")]
 public async Task<ActionResult<bool>> OpenDoor(long code)
 {

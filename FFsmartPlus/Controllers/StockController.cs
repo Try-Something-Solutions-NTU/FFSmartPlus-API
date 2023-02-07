@@ -37,6 +37,7 @@ namespace FFsmartPlus.Controllers
         /// Get the current stock of an Item 
         /// </summary>
         //GET: api/item/{id}/Stock
+        [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef},{UserRoles.Chef}")]
         [HttpGet("")]
         [ProducesResponseType(typeof(CurrentStockDto), 200)]
         [ProducesResponseType( 404)]
@@ -63,7 +64,7 @@ namespace FFsmartPlus.Controllers
         [ProducesResponseType( 404)]
         [ProducesResponseType(401)]
         [ProducesResponseType(400)]
-        [Authorize]
+        [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef},{UserRoles.Chef}")]
         [HttpPost("Add")]
         public async Task<ActionResult<bool>> AddStockRequest(long id, NewUnitDto newUnits)
         {
@@ -99,7 +100,7 @@ namespace FFsmartPlus.Controllers
         [ProducesResponseType(typeof(bool), 200)]
         [ProducesResponseType( 404)]
         [ProducesResponseType( 400)]
-
+        [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef},{UserRoles.Chef}")]
         [HttpPost("Remove")] 
         public async Task<ActionResult<bool>> RemoveStock(long id, double Quantity)
          {

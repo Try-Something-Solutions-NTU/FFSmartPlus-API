@@ -20,7 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace FFsmartPlus.Controllers;
-
+[Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef}")]
 [Route("api/[controller]")]
 public class AdminController : ControllerBase
 {
@@ -36,9 +36,8 @@ public class AdminController : ControllerBase
     /// <summary>
     /// Get Expired Items
     /// </summary>
-    [Authorize(Roles = UserRoles.Chef)]
-    [Authorize(Roles = UserRoles.Admin)]
-    [Authorize(Roles = UserRoles.HeadChef)]
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef}")]
+
     [HttpGet("Expiry")]
     public async Task<ActionResult<List<UnitListDto>>> GetExpiredItems()
     {
@@ -53,9 +52,7 @@ public class AdminController : ControllerBase
     /// <summary>
     /// Get Expired Items
     /// </summary>
-    [Authorize(Roles = UserRoles.Chef)]
-    [Authorize(Roles = UserRoles.Admin)]
-    [Authorize(Roles = UserRoles.HeadChef)]
+
     [HttpGet("ExpiryByDays")]
     public async Task<ActionResult<List<UnitListDto>>> GetExpiredItems(int days)
     {
@@ -70,8 +67,6 @@ public class AdminController : ControllerBase
     /// <summary>
     /// Runs End of day operations
     /// </summary>
-    [Authorize(Roles = UserRoles.Admin)]
-    [Authorize(Roles = UserRoles.HeadChef)]
     [HttpDelete("EndOfDay")]
     public async Task<ActionResult> EndOfDay()
     {
@@ -96,7 +91,6 @@ public class AdminController : ControllerBase
         _context.SaveChangesAsync();
         return NoContent();
     }
-    [Authorize(Roles = UserRoles.HeadChef)]
     [HttpGet("Audit")]
     public async Task<ActionResult<List<AuditDto>>> AuditGeneration(int history, string? email)
     {
@@ -120,7 +114,6 @@ public class AdminController : ControllerBase
         return Ok(list);
 
     }
-    [Authorize(Roles = UserRoles.HeadChef)]
     [HttpGet("Audit/{id}")]
     public async Task<ActionResult<List<AuditDto>>> AuditGeneration(long id, int history)
     {
@@ -140,7 +133,6 @@ public class AdminController : ControllerBase
         // Generate report
         return Ok(list);
     }
-    [Authorize(Roles = UserRoles.HeadChef)] 
     [HttpGet("ExpiredNames")]
     public async Task<ActionResult<List<string>>> GetExpiredItemsNames()
     {

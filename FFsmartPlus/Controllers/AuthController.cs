@@ -42,7 +42,7 @@ namespace FFsmartPlus.Controllers
         /// <summary>
         ///  Gets all users
         /// </summary>
-        [Authorize]
+        [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef}")]
         [HttpGet("all")]
         public async Task<ActionResult<List<string>>> GetUsers()
         {
@@ -51,6 +51,7 @@ namespace FFsmartPlus.Controllers
         /// <summary>
         /// Gets all roles
         /// </summary>
+        [Authorize]
         [HttpGet("roles")]
         public async Task<ActionResult<List<string>>> GetAllRoles()
         {
@@ -60,6 +61,7 @@ namespace FFsmartPlus.Controllers
         /// <summary>
         /// 
         /// </summary>
+        [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef}")]
         [HttpGet("{username}/roles")]
         public async Task<ActionResult<List<string>>> GetRolesByUserName(string username)
         {
@@ -142,7 +144,7 @@ namespace FFsmartPlus.Controllers
         /// Admin function to add user to role
         /// </summary>
         [HttpPost]
-        [Authorize(Roles = UserRoles.Admin)]
+        [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef}")]
         [ProducesResponseType(typeof(Response), 200)]
         [ProducesResponseType( 401)]
         [ProducesResponseType(typeof(Response), 400)]
@@ -169,7 +171,7 @@ namespace FFsmartPlus.Controllers
         [ProducesResponseType(typeof(Response), 200)]
         [ProducesResponseType( 401)]
         [ProducesResponseType(typeof(Response), 400)]
-        [Authorize(Roles = UserRoles.Admin)]
+        [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef}")]
         [Route("{username}/Remove-Role")]
         public async Task<IActionResult> RemoveRole(string username, string role)
         {
@@ -189,7 +191,7 @@ namespace FFsmartPlus.Controllers
         /// Deletes A user
         /// </summary>
         [HttpDelete]
-        [Authorize(Roles = UserRoles.Admin)]
+        [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef}")]
         [Route("Delete-User")]
         public async Task<ActionResult<bool>> DeleteUser(string username)
         {
