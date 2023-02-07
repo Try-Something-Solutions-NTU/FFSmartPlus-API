@@ -171,7 +171,7 @@ public class OrdersController : ControllerBase
     /// <summary>
     /// Registers and sends orders to suppliers
     /// </summary>
-    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef}")]
+    [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef},{UserRoles.Delivery}")]
     [HttpPost("ConfirmOrderByIDs")]
     public async Task<ActionResult<bool>> ConfirmOrderByIDs(OrderRequestDto orderRequest)
     {
