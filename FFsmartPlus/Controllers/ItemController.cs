@@ -73,7 +73,6 @@ namespace FFsmartPlus.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(typeof(ValidationResult), 400)]
         [ProducesResponseType( 404)]
-        [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef}")]
 
         // PUT: api/Item/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -122,7 +121,6 @@ namespace FFsmartPlus.Controllers
         /// <summary>
         /// Deactivate an item 
         /// </summary>
-        [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef}")]
         [HttpPut("{id}/deactivate")]
         public async Task<IActionResult> DeactivateItem(long id)
         {
@@ -165,7 +163,6 @@ namespace FFsmartPlus.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(ItemDto), 201)]
         [ProducesResponseType(typeof(ValidationResult), 400)]
-        [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef}")]
         public async Task<ActionResult<Item>> PostItem(NewItemDto newItem)
         {
           if (_context.Items == null)
@@ -200,7 +197,6 @@ namespace FFsmartPlus.Controllers
         /// Deletes a specific Item
         /// </summary>
         // DELETE: api/Item/5
-        [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.HeadChef}")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteItem(long id)
         {
